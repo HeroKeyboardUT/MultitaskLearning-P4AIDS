@@ -72,9 +72,9 @@ pipelines:
       bidirectional: true
 
     training:
-      epochs: 3
-      batch_size: 16
-      learning_rate: 2.0e-5
+      epochs: 50
+      batch_size: 64
+      learning_rate: 1e-3
       weight_decay: 0.01
 
     loss:
