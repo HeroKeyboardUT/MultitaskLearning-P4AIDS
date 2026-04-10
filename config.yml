@@ -1,0 +1,148 @@
+################################################################################
+# Student Feedback Dataset Processing - Configuration
+################################################################################
+
+# ==============================================================================
+# PATHS CONFIGURATION
+# ==============================================================================
+paths:
+  data_dir: "./data"                    # Directory for downloaded dataset
+  outputs_dir: "./outputs"              # Directory for outputs (models, results)
+  logs_dir: "./logs"                    # Directory for logs
+  images_dir: "./images"                # Directory for visualizations
+# ==============================================================================
+# DATA CONFIGURATION
+# ==============================================================================
+data:
+  # Google Drive File IDs for different splits
+  file_ids:
+    train:
+      sentences: "1nzak5OkrheRV1ltOGCXkT671bmjODLhP"
+      sentiments: "1ye-gOZIBqXdKOoi_YxvpT6FeRNmViPPv"
+      topics: "14MuDtwMnNOcr4z_8KdpxprjbwaQ7lJ_C"
+    validation:
+      sentences: "1sMJSR3oRfPc3fe1gK-V3W5F24tov_517"
+      sentiments: "1GiY1AOp41dLXIIkgES4422AuDwmbUseL"
+      topics: "1DwLgDEaFWQe8mOd7EpF-xqMEbDLfdT-W"
+    test:
+      sentences: "1aNMOeZZbNwSRkjyCWAGtNCMa3YrshR-n"
+      sentiments: "1vkQS5gI0is4ACU58-AbWusnemw7KZNfO"
+      topics: "1_ArMpDguVsbUGl-xSMkTF_p5KpZrmpSB"
+
+  # File name patterns for downloaded data
+  file_patterns:
+    sentences: "{split}_sents.txt"
+    sentiments: "{split}_sens.txt"
+    topics: "{split}_tops.txt"
+
+  # Data filtering and preprocessing
+  preprocess:
+    encoding: "utf-8"
+    exclude_sentiments: [1]             # Exclude Neutral (1)
+    exclude_topics: [3]                 # Exclude Others (3)
+    sentiment_mapping:
+      2: 1                              # Remap: 2 -> 1 (binary labels)
+
+  # Label definitions
+  labels:
+    sentiment:
+      names: ["negative", "positive"]
+      num_classes: 2
+    topic:
+      names: ["lecturer", "training_program", "facility"]
+      num_classes: 3
+
+  # Splits to process
+  splits:
+    - "train"
+    - "validation"
+    - "test"
+
+# ==============================================================================
+# PIPELINE CONFIGURATION (SEPARATED HYPERPARAMS PER MODEL)
+# ==============================================================================
+pipelines:
+  LSTM:
+    model:
+      min_freq: 2
+      embedding_dim: 300
+      hidden_dim: 256
+      n_layers: 2
+      dropout: 0.5
+      bidirectional: true
+
+    training:
+      epochs: 3
+      batch_size: 16
+      learning_rate: 2.0e-5
+      weight_decay: 0.01
+
+    loss:
+      sentiment_label_smoothing: 0.1
+      topic_label_smoothing: 0.2
+
+    early_stopping:
+      patience: 10
+      verbose: true
+      delta: 0.0
+      checkpoint_path: "./outputs/best_multitask_lstm.pt"
+
+    output:
+      sentiment_report_path: "./logs/sentiment_report.txt"
+      topic_report_path: "./logs/topic_report.txt"
+      confusion_matrix_dir: "./images"
+
+  TRANSFORMER:
+    model: {}
+    training: {}
+    loss: {}
+    early_stopping: {}
+    output: {}
+
+  RNN:
+    model: {}
+    training: {}
+    loss: {}
+    early_stopping: {}
+    output: {}
+
+# ==============================================================================
+# EVALUATION CONFIGURATION
+# ==============================================================================
+evaluation:
+  # Evaluation strategy
+  eval_strategy: "epoch"                  # When to evaluate: steps, epoch, no
+  eval_steps: null                        # If steps strategy, evaluate every N steps
+  
+  # Metrics to track
+  metrics:
+    - "accuracy"
+    - "f1"
+    - "precision"
+    - "recall"
+  
+  # Multi-task evaluation
+  multi_task: true                        # Evaluate both sentiment and topic
+
+# ==============================================================================
+# EXPLANATION CONFIGURATION (For model interpretability)
+# ==============================================================================
+explanation:
+  method: "attention"                     # Method: attention, gradients, lime, shap
+  num_features: 10                        # Number of important features to extract
+  visualize: true                         # Generate visualization
+
+# ==============================================================================
+# LOGGING CONFIGURATION
+# ==============================================================================
+logging:
+  level: "INFO"                           # Logging level: DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  save_logs: true                         # Save logs to file
+
+# ==============================================================================
+# REPRODUCIBILITY CONFIGURATION
+# ==============================================================================
+reproducibility:
+  seed: 42                                # Random seed for reproducibility
+  deterministic: true                     # Use deterministic algorithms
