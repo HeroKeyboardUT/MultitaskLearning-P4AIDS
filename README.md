@@ -76,10 +76,14 @@ Bạn nên làm 3 việc trước khi train:
 
 2. Mở config.yml để đặt project cho dễ quản lý (nếu cần):
 - project: student-feedback
-- run_name: null hoặc tên run riêng
 - tags: nhãn cho run
 
 3. Chạy pipeline bình thường, hệ thống tự log metric theo epoch và tự finish run cuối quá trình.
+
+Tên run W&B được tự sinh theo format:
+- LSTM-YYYYMMDD-HHMMSS
+- RNN-YYYYMMDD-HHMMSS
+- TRANSFORMER-YYYYMMDD-HHMMSS
 
 ## 5. Cấu trúc dữ liệu bắt buộc
 
@@ -158,4 +162,4 @@ Tất cả tham số nằm trong config.yml theo từng model:
 - loss: label smoothing và loss weight
 - early_stopping: patience, delta, checkpoint_path
 - output: report path và confusion matrix dir
-- wandb: project, run_name, tags, enabled
+- wandb: project, tags, enabled

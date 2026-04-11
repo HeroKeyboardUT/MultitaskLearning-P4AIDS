@@ -93,7 +93,6 @@ pipelines:
     wandb:
       enabled: true                      # Enable Weights & Biases logging
       project: "student-feedback"       # W&B project name
-      run_name: null                     # Optional custom run name
       tags: ["lstm", "multitask"]     # Tags attached to run
 
   TRANSFORMER:
@@ -136,7 +135,6 @@ pipelines:
     wandb:
       enabled: true                      # Enable Weights & Biases logging
       project: "student-feedback"       # W&B project name
-      run_name: null                     # Optional custom run name
       tags: ["transformer", "multitask"] # Tags attached to run
 
   RNN:
@@ -179,7 +177,6 @@ pipelines:
     wandb:
       enabled: true                      # Enable Weights & Biases logging
       project: "student-feedback"       # W&B project name
-      run_name: null                     # Optional custom run name
       tags: ["rnn", "multitask"]      # Tags attached to run
 
 # ==============================================================================

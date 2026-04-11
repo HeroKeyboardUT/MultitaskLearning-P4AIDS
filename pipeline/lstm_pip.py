@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from datetime import datetime
 from pathlib import Path
 from dataloader.data_loader import build_vocab_and_loaders
 from utils.earlystop import EarlyStopping
@@ -34,7 +35,6 @@ def lstm_pipline(
     confusion_matrix_dir="./images/lstm",
     use_wandb=False,
     wandb_project="student-feedback",
-    wandb_run_name=None,
     wandb_tags=None,
 ):
     # Xây dựng vocab và dataloader
@@ -96,13 +96,15 @@ def lstm_pipline(
         "early_stopping_delta": early_stopping_delta,
     }
 
+    resolved_wandb_run_name = f"LSTM-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
     wandb_run = None
     if use_wandb:
         try:
             import wandb
             wandb_run = wandb.init(
                 project=wandb_project,
-                name=wandb_run_name,
+                name=resolved_wandb_run_name,
                 tags=wandb_tags,
                 config=wandb_config_payload,
             )

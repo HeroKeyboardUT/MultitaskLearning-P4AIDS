@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import datetime
 
 import torch
 import torch.nn as nn
@@ -42,7 +43,6 @@ def transformer_pipeline(
     confusion_matrix_dir="./images/transformer",
     use_wandb=False,
     wandb_project="student-feedback",
-    wandb_run_name=None,
     wandb_tags=None,
 ):
     vocab, loaders = build_vocab_and_loaders(
@@ -127,13 +127,15 @@ def transformer_pipeline(
         "early_stopping_delta": early_stopping_delta,
     }
 
+    resolved_wandb_run_name = f"TRANSFORMER-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
     wandb_run = None
     if use_wandb:
         try:
             import wandb
             wandb_run = wandb.init(
                 project=wandb_project,
-                name=wandb_run_name,
+                name=resolved_wandb_run_name,
                 tags=wandb_tags,
                 config=wandb_config_payload,
             )

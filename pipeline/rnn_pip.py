@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from datetime import datetime
 from pathlib import Path
 from sklearn.metrics import classification_report, f1_score
 
@@ -41,7 +42,6 @@ def rnn_pipline(
     confusion_matrix_dir="./images/rnn",
     use_wandb=False,
     wandb_project="student-feedback",
-    wandb_run_name=None,
     wandb_tags=None,
 ):
     # Xay dung vocab va dataloader
@@ -128,13 +128,15 @@ def rnn_pipline(
         "early_stopping_delta": early_stopping_delta,
     }
 
+    resolved_wandb_run_name = f"RNN-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
     wandb_run = None
     if use_wandb:
         try:
             import wandb
             wandb_run = wandb.init(
                 project=wandb_project,
-                name=wandb_run_name,
+                name=resolved_wandb_run_name,
                 tags=wandb_tags,
                 config=wandb_config_payload,
             )
