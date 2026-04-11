@@ -92,6 +92,12 @@ pipelines:
       topic_report_path: "./logs/lstm_topic_classification_report.txt"
       confusion_matrix_dir: "./images/lstm"
 
+    wandb:
+      enabled: false
+      project: "student-feedback"
+      run_name: null
+      tags: ["lstm", "multitask"]
+
   TRANSFORMER:
     model:
       min_freq: 2
@@ -129,6 +135,12 @@ pipelines:
       topic_report_path: "./logs/transformer_topic_classification_report.txt"
       confusion_matrix_dir: "./images/transformer"
 
+    wandb:
+      enabled: false
+      project: "student-feedback"
+      run_name: null
+      tags: ["transformer", "multitask"]
+
   RNN:
     model:
       min_freq: 2
@@ -165,6 +177,12 @@ pipelines:
       sentiment_report_path: "./logs/rnn_sentiment_classification_report.txt"
       topic_report_path: "./logs/rnn_topic_classification_report.txt"
       confusion_matrix_dir: "./images/rnn"
+
+    wandb:
+      enabled: false
+      project: "student-feedback"
+      run_name: null
+      tags: ["rnn", "multitask"]
 
 # ==============================================================================
 # EVALUATION CONFIGURATION

@@ -39,6 +39,10 @@ def rnn_pipline(
     sentiment_report_path="./logs/rnn_sentiment_classification_report.txt",
     topic_report_path="./logs/rnn_topic_classification_report.txt",
     confusion_matrix_dir="./images/rnn",
+    use_wandb=False,
+    wandb_project="student-feedback",
+    wandb_run_name=None,
+    wandb_tags=None,
 ):
     # Xay dung vocab va dataloader
     vocab, loaders = build_vocab_and_loaders(
@@ -96,6 +100,33 @@ def rnn_pipline(
 
     print(f"STARTING RNN TRAINING ON {device}...")
     print(f"Using {rnn_type.upper()} backbone")
+
+    wandb_run = None
+    if use_wandb:
+        try:
+            import wandb
+            wandb_run = wandb.init(
+                project=wandb_project,
+                name=wandb_run_name,
+                tags=wandb_tags,
+                config={
+                    "model": "RNN",
+                    "rnn_type": rnn_type,
+                    "epochs": n_epochs,
+                    "batch_size": batch_size,
+                    "learning_rate": lr,
+                    "weight_decay": weight_decay,
+                    "embedding_dim": embedding_dim,
+                    "hidden_dim": hidden_dim,
+                    "n_layers": n_layers,
+                    "dropout": dropout,
+                    "label_smoothing_sentiment": sent_alpha,
+                    "label_smoothing_topic": topic_alpha,
+                },
+            )
+        except ImportError:
+            print("[WARN] wandb is not installed. Continuing without W&B logging.")
+            use_wandb = False
 
     for epoch in range(n_epochs):
         model.train()
@@ -195,6 +226,21 @@ def rnn_pipline(
             f"F1 Combined: {val_score:.4f} | LR: {current_lr:.2e}"
         )
 
+        if use_wandb and wandb_run is not None:
+            wandb_run.log({
+                "epoch": epoch + 1,
+                "train/loss": avg_train_loss,
+                "train/acc_sentiment": train_acc_sent,
+                "train/acc_topic": train_acc_topic,
+                "val/loss": avg_val_loss,
+                "val/acc_sentiment": val_acc_sent,
+                "val/acc_topic": val_acc_topic,
+                "val/f1_sentiment_macro": val_f1_sent,
+                "val/f1_topic_macro": val_f1_topic,
+                "val/f1_combined": val_score,
+                "train/lr": current_lr,
+            })
+
         early_stopping(avg_val_loss, model)
         if early_stopping.early_stop:
             print(
@@ -247,6 +293,13 @@ def rnn_pipline(
     )
 
     print(">>> RNN evaluation complete. Reports and confusion matrices saved.")
+
+    if use_wandb and wandb_run is not None:
+        wandb_run.log({
+            "best/f1_combined": best_score,
+            "best/val_loss": early_stopping.val_loss_min,
+        })
+        wandb_run.finish()
 
     return model
 

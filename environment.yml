@@ -14,6 +14,7 @@ dependencies:
   # PyTorch và các thư viện liên quan (Bản CPU)
   # Nếu sau này anh dùng GPU, thay 'cpuonly' bằng 'pytorch-cuda=12.1' và thêm channel 'nvidia'
   - pytorch>=2.2.0
+  - pytorch-cuda=12.1
   - torchvision
   - torchaudio
   - cpuonly
@@ -31,3 +32,4 @@ dependencies:
   - pip:
       - gdown>=4.7.0
       - datasets>=2.14.0
+      - wandb>=0.17.0

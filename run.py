@@ -144,6 +144,7 @@ def task_run_pipeline(
     loss_config = selected_pipeline_config.get("loss", {})
     early_stopping_config = selected_pipeline_config.get("early_stopping", {})
     output_config = selected_pipeline_config.get("output", {})
+    wandb_config = selected_pipeline_config.get("wandb", {})
 
     ds_dict = load_splits(
         splits=data_config["splits"],
@@ -194,6 +195,10 @@ def task_run_pipeline(
                 "confusion_matrix_dir",
                 "./images/lstm",
             ),
+            use_wandb=wandb_config.get("enabled", False),
+            wandb_project=wandb_config.get("project", "student-feedback"),
+            wandb_run_name=wandb_config.get("run_name"),
+            wandb_tags=wandb_config.get("tags"),
         )
         logger.info("LSTM pipeline completed")
 
@@ -241,6 +246,10 @@ def task_run_pipeline(
                 "confusion_matrix_dir",
                 "./images/rnn",
             ),
+            use_wandb=wandb_config.get("enabled", False),
+            wandb_project=wandb_config.get("project", "student-feedback"),
+            wandb_run_name=wandb_config.get("run_name"),
+            wandb_tags=wandb_config.get("tags"),
         )
         logger.info("RNN pipeline completed")
 
@@ -288,6 +297,10 @@ def task_run_pipeline(
                 "confusion_matrix_dir",
                 "./images/transformer",
             ),
+            use_wandb=wandb_config.get("enabled", False),
+            wandb_project=wandb_config.get("project", "student-feedback"),
+            wandb_run_name=wandb_config.get("run_name"),
+            wandb_tags=wandb_config.get("tags"),
         )
         logger.info("Transformer pipeline completed")
 

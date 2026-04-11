@@ -32,6 +32,10 @@ def lstm_pipline(
     sentiment_report_path="./logs/lstm_sentiment_classification_report.txt",
     topic_report_path="./logs/lstm_topic_classification_report.txt",
     confusion_matrix_dir="./images/lstm",
+    use_wandb=False,
+    wandb_project="student-feedback",
+    wandb_run_name=None,
+    wandb_tags=None,
 ):
     # Xây dựng vocab và dataloader
     vocab, loaders = build_vocab_and_loaders(ds_dict=ds_dict, batch_size=batch_size, min_freq=min_freq)
@@ -71,6 +75,32 @@ def lstm_pipline(
     # Fit model
     print(f"STARTING TRAINING ON {device}...")
 
+    wandb_run = None
+    if use_wandb:
+        try:
+            import wandb
+            wandb_run = wandb.init(
+                project=wandb_project,
+                name=wandb_run_name,
+                tags=wandb_tags,
+                config={
+                    "model": "LSTM",
+                    "epochs": n_epochs,
+                    "batch_size": batch_size,
+                    "learning_rate": lr,
+                    "weight_decay": weight_decay,
+                    "embedding_dim": embedding_dim,
+                    "hidden_dim": hidden_dim,
+                    "n_layers": n_layers,
+                    "dropout": dropout,
+                    "label_smoothing_sentiment": sent_alpha,
+                    "label_smoothing_topic": topic_alpha,
+                },
+            )
+        except ImportError:
+            print("[WARN] wandb is not installed. Continuing without W&B logging.")
+            use_wandb = False
+
     for epoch in range(n_epochs):
         train_loss, train_acc_sent, train_acc_topic = epoch_train(model, loaders["train"], optimizer, criterion, device)
         valid_loss, valid_acc_sent, valid_acc_topic = epoch_evaluate(model, loaders["validation"], criterion, device)
@@ -79,6 +109,18 @@ def lstm_pipline(
         print(f'Epoch: {epoch+1:02}')
         print(f'\tTrain Loss: {train_loss:.3f} | Sent Acc: {train_acc_sent*100:.2f}% | Topic Acc: {train_acc_topic*100:.2f}%')
         print(f'\t Val. Loss: {valid_loss:.3f} | Sent Acc: {valid_acc_sent*100:.2f}% | Topic Acc: {valid_acc_topic*100:.2f}%')
+
+        if use_wandb and wandb_run is not None:
+            wandb_run.log({
+                "epoch": epoch + 1,
+                "train/loss": train_loss,
+                "train/acc_sentiment": train_acc_sent,
+                "train/acc_topic": train_acc_topic,
+                "val/loss": valid_loss,
+                "val/acc_sentiment": valid_acc_sent,
+                "val/acc_topic": valid_acc_topic,
+            })
+
         # GỌI EARLY STOPPING
         early_stopping(valid_loss, model)
         
@@ -121,6 +163,10 @@ def lstm_pipline(
     )
     
     print('>>> Evaluation complete. Reports and confusion matrices saved.')
+
+    if use_wandb and wandb_run is not None:
+        wandb_run.log({"best/val_loss": early_stopping.val_loss_min})
+        wandb_run.finish()
 
     return model
 
