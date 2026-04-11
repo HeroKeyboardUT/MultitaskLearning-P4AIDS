@@ -6,7 +6,6 @@ from sklearn.metrics import classification_report, f1_score
 
 from dataloader.data_loader import build_vocab_and_loaders
 from model.MultiTaskTransformer import MultiTaskTransformer
-from utils.data_utils import get_class_weights
 from utils.earlystop import EarlyStopping
 from utils.plot_utils import plot_confusion_matrix
 
@@ -56,17 +55,6 @@ def transformer_pipeline(
     n_sentiment = len(sentiment_names)
     n_topic = len(topic_names)
 
-    weight_sent = get_class_weights(
-        train_dataset=ds_dict["train"],
-        column_name="sentiment",
-        num_classes=n_sentiment,
-    ).to(device)
-    weight_topic = get_class_weights(
-        train_dataset=ds_dict["train"],
-        column_name="topic",
-        num_classes=n_topic,
-    ).to(device)
-
     model = MultiTaskTransformer(
         vocab_size=len(vocab),
         embedding_dim=embedding_dim,
@@ -79,8 +67,8 @@ def transformer_pipeline(
         max_seq_len=max_seq_len,
     ).to(device)
 
-    criterion_sent = nn.CrossEntropyLoss(weight=weight_sent)
-    criterion_topic = nn.CrossEntropyLoss(weight=weight_topic)
+    criterion_sent = nn.CrossEntropyLoss()
+    criterion_topic = nn.CrossEntropyLoss()
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(

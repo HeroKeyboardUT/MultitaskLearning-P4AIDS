@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from pathlib import Path
-from utils.data_utils import get_class_weights
 from dataloader.data_loader import build_vocab_and_loaders
 from utils.earlystop import EarlyStopping
 from model.BidirLSTM import BidirLSTM
@@ -55,21 +54,9 @@ def lstm_pipline(
     ).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
 
-    # Tính class weights từ tập train để giảm ảnh hưởng lệch lớp
-    weights_sent = get_class_weights(
-        train_dataset=ds_dict["train"],
-        column_name="sentiment",
-        num_classes=len(sentiment_names),
-    ).to(device)
-    weights_topic = get_class_weights(
-        train_dataset=ds_dict["train"],
-        column_name="topic",
-        num_classes=len(topic_names),
-    ).to(device)
-
-    # Khởi tạo loss có class weights
-    criterion_sent = nn.CrossEntropyLoss(weight=weights_sent)
-    criterion_topic = nn.CrossEntropyLoss(weight=weights_topic)
+    # Khởi tạo loss chuẩn (không dùng class weights)
+    criterion_sent = nn.CrossEntropyLoss()
+    criterion_topic = nn.CrossEntropyLoss()
     criterion = get_criterion(criterion_sent, criterion_topic)
 
     # Khởi tạo Early Stopping
