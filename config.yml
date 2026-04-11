@@ -85,12 +85,12 @@ pipelines:
       patience: 10
       verbose: true
       delta: 0.0
-      checkpoint_path: "./outputs/best_multitask_lstm.pt"
+      checkpoint_path: "./outputs/lstm_multitask_best_model.pt"
 
     output:
-      sentiment_report_path: "./logs/sentiment_report.txt"
-      topic_report_path: "./logs/topic_report.txt"
-      confusion_matrix_dir: "./images"
+      sentiment_report_path: "./logs/lstm_sentiment_classification_report.txt"
+      topic_report_path: "./logs/lstm_topic_classification_report.txt"
+      confusion_matrix_dir: "./images/lstm"
 
   TRANSFORMER:
     model: {}
@@ -127,12 +127,12 @@ pipelines:
       patience: 5
       verbose: true
       delta: 0.0
-      checkpoint_path: "./outputs/best_multitask_rnn.pt"
+      checkpoint_path: "./outputs/rnn_multitask_best_model.pt"
 
     output:
-      sentiment_report_path: "./logs/rnn_sentiment_report.txt"
-      topic_report_path: "./logs/rnn_topic_report.txt"
-      confusion_matrix_dir: "./images"
+      sentiment_report_path: "./logs/rnn_sentiment_classification_report.txt"
+      topic_report_path: "./logs/rnn_topic_classification_report.txt"
+      confusion_matrix_dir: "./images/rnn"
 
 # ==============================================================================
 # EVALUATION CONFIGURATION

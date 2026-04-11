@@ -177,21 +177,21 @@ def task_run_pipeline(
             early_stopping_delta=early_stopping_config.get("delta", 0.0),
             checkpoint_path=early_stopping_config.get(
                 "checkpoint_path",
-                "./outputs/best_multitask_lstm.pt",
+                "./outputs/lstm_multitask_best_model.pt",
             ),
             sentiment_names=data_config["labels"]["sentiment"]["names"],
             topic_names=data_config["labels"]["topic"]["names"],
             sentiment_report_path=output_config.get(
                 "sentiment_report_path",
-                "./logs/sentiment_report.txt",
+                "./logs/lstm_sentiment_classification_report.txt",
             ),
             topic_report_path=output_config.get(
                 "topic_report_path",
-                "./logs/topic_report.txt",
+                "./logs/lstm_topic_classification_report.txt",
             ),
             confusion_matrix_dir=output_config.get(
                 "confusion_matrix_dir",
-                paths_config.get("images_dir", "./images"),
+                "./images/lstm",
             ),
         )
         logger.info("LSTM pipeline completed")
@@ -222,21 +222,21 @@ def task_run_pipeline(
             early_stopping_delta=early_stopping_config.get("delta", 0.0),
             checkpoint_path=early_stopping_config.get(
                 "checkpoint_path",
-                "./outputs/best_multitask_rnn.pt",
+                "./outputs/rnn_multitask_best_model.pt",
             ),
             sentiment_names=data_config["labels"]["sentiment"]["names"],
             topic_names=data_config["labels"]["topic"]["names"],
             sentiment_report_path=output_config.get(
                 "sentiment_report_path",
-                "./logs/rnn_sentiment_report.txt",
+                "./logs/rnn_sentiment_classification_report.txt",
             ),
             topic_report_path=output_config.get(
                 "topic_report_path",
-                "./logs/rnn_topic_report.txt",
+                "./logs/rnn_topic_classification_report.txt",
             ),
             confusion_matrix_dir=output_config.get(
                 "confusion_matrix_dir",
-                paths_config.get("images_dir", "./images"),
+                "./images/rnn",
             ),
         )
         logger.info("RNN pipeline completed")

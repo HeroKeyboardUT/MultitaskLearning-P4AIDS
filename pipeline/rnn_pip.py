@@ -5,6 +5,7 @@ from sklearn.metrics import classification_report, f1_score
 
 from dataloader.data_loader import build_vocab_and_loaders
 from model.BidirRNN import BidirRNN
+from utils.data_utils import get_class_weights
 from utils.earlystop import EarlyStopping
 from utils.plot_utils import plot_confusion_matrix
 
@@ -31,12 +32,12 @@ def rnn_pipline(
     early_stopping_patience=5,
     early_stopping_verbose=True,
     early_stopping_delta=0.0,
-    checkpoint_path="./outputs/best_multitask_rnn.pt",
+    checkpoint_path="./outputs/rnn_multitask_best_model.pt",
     sentiment_names=None,
     topic_names=None,
-    sentiment_report_path="./logs/rnn_sentiment_report.txt",
-    topic_report_path="./logs/rnn_topic_report.txt",
-    confusion_matrix_dir="./images",
+    sentiment_report_path="./logs/rnn_sentiment_classification_report.txt",
+    topic_report_path="./logs/rnn_topic_classification_report.txt",
+    confusion_matrix_dir="./images/rnn",
 ):
     # Xay dung vocab va dataloader
     vocab, loaders = build_vocab_and_loaders(
@@ -55,14 +56,16 @@ def rnn_pipline(
     n_sentiment = len(sentiment_names)
     n_topic = len(topic_names)
 
-    train_sent = torch.tensor(ds_dict["train"]["sentiment"], dtype=torch.long)
-    train_topic = torch.tensor(ds_dict["train"]["topic"], dtype=torch.long)
-
-    sent_counts = torch.bincount(train_sent, minlength=n_sentiment).float()
-    topic_counts = torch.bincount(train_topic, minlength=n_topic).float()
-
-    weight_sent = (sent_counts.sum() / (n_sentiment * sent_counts.clamp_min(1.0))).to(device)
-    weight_topic = (topic_counts.sum() / (n_topic * topic_counts.clamp_min(1.0))).to(device)
+    weight_sent = get_class_weights(
+        train_dataset=ds_dict["train"],
+        column_name="sentiment",
+        num_classes=n_sentiment,
+    ).to(device)
+    weight_topic = get_class_weights(
+        train_dataset=ds_dict["train"],
+        column_name="topic",
+        num_classes=n_topic,
+    ).to(device)
 
     model = BidirRNN(
         vocab_size=len(vocab),
@@ -242,14 +245,14 @@ def rnn_pipline(
         y_sent_true,
         y_sent_pred,
         classes=sentiment_names,
-        title="RNN Sentiment Confusion Matrix",
+        title="rnn_sentiment",
         output_dir=confusion_matrix_dir,
     )
     plot_confusion_matrix(
         y_topic_true,
         y_topic_pred,
         classes=topic_names,
-        title="RNN Topic Confusion Matrix",
+        title="rnn_topic",
         output_dir=confusion_matrix_dir,
     )
 

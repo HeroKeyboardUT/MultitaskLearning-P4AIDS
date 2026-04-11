@@ -444,6 +444,7 @@ def visualize_data(ds_dict: DatasetDict, images_dir: str = "images") -> Dict[str
 def get_class_weights(
     train_dataset: Dataset,
     column_name: str,
+    num_classes: int = None,
 ):
     """
     Compute balanced class weights from train split only.
@@ -452,20 +453,25 @@ def get_class_weights(
         train_dataset: HuggingFace Dataset of train split
         column_name: Target label column name (e.g., sentiment, topic)
 
+    Args:
+        num_classes: Total number of classes. If provided, output weights
+            always have this length (useful when some classes are absent
+            in the current split).
+
     Returns:
         Torch tensor of class weights sorted by class id.
     """
-    import numpy as np
     import torch
-    from sklearn.utils.class_weight import compute_class_weight
 
-    labels = train_dataset[column_name]
-    classes = np.unique(labels)
+    labels = torch.tensor(train_dataset[column_name], dtype=torch.long)
 
-    weights = compute_class_weight(
-        class_weight="balanced",
-        classes=classes,
-        y=labels,
-    )
+    if labels.numel() == 0:
+        raise ValueError(f"No labels found in column '{column_name}'.")
 
-    return torch.tensor(weights, dtype=torch.float)
+    if num_classes is None:
+        num_classes = int(labels.max().item()) + 1
+
+    counts = torch.bincount(labels, minlength=num_classes).float()
+    weights = counts.sum() / (num_classes * counts.clamp_min(1.0))
+
+    return weights

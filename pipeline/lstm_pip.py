@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from pathlib import Path
-from utils.data_utils import get_class_weights
 from dataloader.data_loader import build_vocab_and_loaders
 from utils.earlystop import EarlyStopping
 from model.BidirLSTM import BidirLSTM
@@ -27,12 +26,12 @@ def lstm_pipline(
     early_stopping_patience=10,
     early_stopping_verbose=True,
     early_stopping_delta=0.0,
-    checkpoint_path="./outputs/best_multitask_lstm.pt",
+    checkpoint_path="./outputs/lstm_multitask_best_model.pt",
     sentiment_names=None,
     topic_names=None,
-    sentiment_report_path="./logs/sentiment_report.txt",
-    topic_report_path="./logs/topic_report.txt",
-    confusion_matrix_dir="./images",
+    sentiment_report_path="./logs/lstm_sentiment_classification_report.txt",
+    topic_report_path="./logs/lstm_topic_classification_report.txt",
+    confusion_matrix_dir="./images/lstm",
 ):
     # Xây dựng vocab và dataloader
     vocab, loaders = build_vocab_and_loaders(ds_dict=ds_dict, batch_size=batch_size, min_freq=min_freq)
@@ -54,10 +53,6 @@ def lstm_pipline(
         bidirectional=bidirectional,
     ).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)    
-
-    # # Tính class weights từ tập train ngay trong pipeline
-    # weights_sent = get_class_weights(ds_dict["train"], "sentiment")
-    # weights_topic = get_class_weights(ds_dict["train"], "topic")
 
     # Khởi tạo loss với weight tương ứng
     criterion_sent = nn.CrossEntropyLoss()
@@ -114,14 +109,14 @@ def lstm_pipline(
         y_sent_true,
         y_sent_pred,
         classes=sentiment_names,
-        title="LSTM Sentiment Confusion Matrix",
+        title="lstm_sentiment",
         output_dir=confusion_matrix_dir,
     )
     plot_confusion_matrix(
         y_topic_true,
         y_topic_pred,
         classes=topic_names,
-        title="LSTM Topic Confusion Matrix",
+        title="lstm_topic",
         output_dir=confusion_matrix_dir,
     )
     
