@@ -55,9 +55,9 @@ def lstm_pipline(
     ).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)    
 
-    # Tính class weights từ tập train ngay trong pipeline
-    weights_sent = get_class_weights(ds_dict["train"], "sentiment")
-    weights_topic = get_class_weights(ds_dict["train"], "topic")
+    # # Tính class weights từ tập train ngay trong pipeline
+    # weights_sent = get_class_weights(ds_dict["train"], "sentiment")
+    # weights_topic = get_class_weights(ds_dict["train"], "topic")
 
     # Khởi tạo loss với weight tương ứng
     criterion_sent = nn.CrossEntropyLoss()
