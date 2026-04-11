@@ -21,6 +21,7 @@ from data_utils import load_splits
 from data_utils import visualize_data
 from pipeline.lstm_pip import lstm_pipline
 from pipeline.rnn_pip import rnn_pipline
+from pipeline.transformer_pip import transformer_pipeline
 
 
 def setup_logging(log_dir: str, log_level: str = "INFO") -> logging.Logger:
@@ -240,6 +241,51 @@ def task_run_pipeline(
             ),
         )
         logger.info("RNN pipeline completed")
+
+    elif selected_model == "TRANSFORMER":
+        logger.info("Starting Transformer train -> eval -> save")
+        transformer_pipeline(
+            ds_dict=ds_dict,
+            n_epochs=training_config.get("epochs", 50),
+            batch_size=training_config.get("batch_size", 64),
+            min_freq=model_config.get("min_freq", 2),
+            embedding_dim=model_config.get("embedding_dim", 256),
+            nhead=model_config.get("nhead", 8),
+            num_encoder_layers=model_config.get("num_encoder_layers", 2),
+            dim_feedforward=model_config.get("dim_feedforward", 512),
+            dropout=model_config.get("dropout", 0.3),
+            max_seq_len=model_config.get("max_seq_len", 512),
+            lr=training_config.get("learning_rate", 1e-3),
+            weight_decay=training_config.get("weight_decay", 0.0),
+            sent_loss_weight=loss_config.get("sentiment_loss_weight", 1.0),
+            topic_loss_weight=loss_config.get("topic_loss_weight", 1.0),
+            grad_clip_norm=training_config.get("grad_clip_norm", 1.0),
+            scheduler_factor=training_config.get("scheduler_factor", 0.5),
+            scheduler_patience=training_config.get("scheduler_patience", 2),
+            scheduler_min_lr=training_config.get("scheduler_min_lr", 1e-5),
+            early_stopping_patience=early_stopping_config.get("patience", 10),
+            early_stopping_verbose=early_stopping_config.get("verbose", True),
+            early_stopping_delta=early_stopping_config.get("delta", 0.0),
+            checkpoint_path=early_stopping_config.get(
+                "checkpoint_path",
+                "./outputs/transformer_multitask_best_model.pt",
+            ),
+            sentiment_names=data_config["labels"]["sentiment"]["names"],
+            topic_names=data_config["labels"]["topic"]["names"],
+            sentiment_report_path=output_config.get(
+                "sentiment_report_path",
+                "./logs/transformer_sentiment_classification_report.txt",
+            ),
+            topic_report_path=output_config.get(
+                "topic_report_path",
+                "./logs/transformer_topic_classification_report.txt",
+            ),
+            confusion_matrix_dir=output_config.get(
+                "confusion_matrix_dir",
+                "./images/transformer",
+            ),
+        )
+        logger.info("Transformer pipeline completed")
 
     else:
         raise NotImplementedError(

@@ -87,10 +87,12 @@ def make_collate_fn(
             batch_first=True,
             padding_value=PAD_IDX,
         )
+        attention_mask = (sentences_padded != PAD_IDX).long()
 
         return {
             "input_ids": sentences_padded,
             "lengths": torch.tensor(lengths, dtype=torch.long),
+            "attention_mask": attention_mask,
             "sentiment": torch.tensor(sentiments, dtype=torch.long),
             "topic": torch.tensor(topics, dtype=torch.long),
         }

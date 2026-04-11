@@ -53,7 +53,7 @@ def lstm_pipline(
         dropout=dropout,
         bidirectional=bidirectional,
     ).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)    
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
 
     # Tính class weights từ tập train để giảm ảnh hưởng lệch lớp
     weights_sent = get_class_weights(
