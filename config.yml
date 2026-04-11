@@ -68,7 +68,7 @@ pipelines:
       embedding_dim: 300
       hidden_dim: 256
       n_layers: 2
-      dropout: 0.5
+      dropout: 0.3
       bidirectional: true
 
     training:
