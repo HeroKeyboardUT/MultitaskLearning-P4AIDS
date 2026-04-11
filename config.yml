@@ -31,13 +31,13 @@ data:
 
   # File name patterns for downloaded data
   file_patterns:
-    sentences: "{split}_sents.txt"
-    sentiments: "{split}_sens.txt"
-    topics: "{split}_tops.txt"
+    sentences: "{split}_sents.txt"      # Text data file pattern
+    sentiments: "{split}_sens.txt"      # Sentiment label file pattern
+    topics: "{split}_tops.txt"          # Topic label file pattern
 
   # Data filtering and preprocessing
   preprocess:
-    encoding: "utf-8"
+    encoding: "utf-8"                   # File encoding when reading txt files
     exclude_sentiments: [1]             # Exclude Neutral (1)
     exclude_topics: [3]                 # Exclude Others (3)
     sentiment_mapping:
@@ -46,9 +46,9 @@ data:
   # Label definitions
   labels:
     sentiment:
-      names: ["negative", "positive"]
+      names: ["negative", "positive"] # Class names mapped to sentiment ids
     topic:
-      names: ["lecturer", "training_program", "facility"]
+      names: ["lecturer", "training_program", "facility"] # Class names mapped to topic ids
 
   # Splits to process
   splits:
@@ -62,135 +62,135 @@ data:
 pipelines:
   LSTM:
     model:
-      min_freq: 2
-      embedding_dim: 300
-      hidden_dim: 256
-      n_layers: 2
-      dropout: 0.3
-      bidirectional: true
+      min_freq: 2                        # Min token frequency kept in vocabulary
+      embedding_dim: 300                 # Word embedding vector size
+      hidden_dim: 256                    # LSTM hidden state size
+      n_layers: 2                        # Number of stacked LSTM layers
+      dropout: 0.3                       # Dropout applied in encoder/head
+      bidirectional: true                # Use BiLSTM if true
 
     training:
-      epochs: 50
-      batch_size: 64
-      learning_rate: 1.0e-3
-      weight_decay: 0.001
+      epochs: 50                         # Maximum training epochs
+      batch_size: 64                     # Samples per optimization step
+      learning_rate: 1.0e-3             # Optimizer learning rate
+      weight_decay: 0.001               # L2 regularization factor
 
     loss:
-      sentiment_label_smoothing: 0.1
-      topic_label_smoothing: 0.2
+      sentiment_label_smoothing: 0.1     # Label smoothing for sentiment CE loss
+      topic_label_smoothing: 0.2         # Label smoothing for topic CE loss
 
     early_stopping:
-      patience: 10
-      verbose: true
-      delta: 0.0
-      checkpoint_path: "./outputs/lstm_multitask_best_model.pt"
+      patience: 10                       # Stop after N non-improving epochs
+      verbose: true                      # Print save/improvement messages
+      delta: 0.0                         # Minimum val_loss improvement to reset patience
+      checkpoint_path: "./outputs/lstm_multitask_best_model.pt" # Best model save path
 
     output:
-      sentiment_report_path: "./logs/lstm_sentiment_classification_report.txt"
-      topic_report_path: "./logs/lstm_topic_classification_report.txt"
-      confusion_matrix_dir: "./images/lstm"
+      sentiment_report_path: "./logs/lstm_sentiment_classification_report.txt" # Sentiment report output
+      topic_report_path: "./logs/lstm_topic_classification_report.txt" # Topic report output
+      confusion_matrix_dir: "./images/lstm" # Confusion matrix folder
 
     wandb:
-      enabled: true
-      project: "student-feedback"
-      run_name: null
-      tags: ["lstm", "multitask"]
+      enabled: true                      # Enable Weights & Biases logging
+      project: "student-feedback"       # W&B project name
+      run_name: null                     # Optional custom run name
+      tags: ["lstm", "multitask"]     # Tags attached to run
 
   TRANSFORMER:
     model:
-      min_freq: 2
-      embedding_dim: 256
-      nhead: 8
-      num_encoder_layers: 2
-      dim_feedforward: 512
-      dropout: 0.3
-      max_seq_len: 512
+      min_freq: 2                        # Min token frequency kept in vocabulary
+      embedding_dim: 256                 # Token embedding / model dimension
+      nhead: 8                           # Number of attention heads
+      num_encoder_layers: 2              # Number of Transformer encoder blocks
+      dim_feedforward: 512               # FFN hidden size inside each encoder block
+      dropout: 0.3                       # Dropout in embeddings/encoder/head
+      max_seq_len: 512                   # Max sequence length for positional embedding
 
     training:
-      epochs: 50
-      batch_size: 64
-      learning_rate: 1.0e-3
-      weight_decay: 0.0
-      grad_clip_norm: 1.0
-      scheduler_factor: 0.5
-      scheduler_patience: 2
-      scheduler_min_lr: 1.0e-5
+      epochs: 50                         # Maximum training epochs
+      batch_size: 64                     # Samples per optimization step
+      learning_rate: 1.0e-3             # Optimizer learning rate
+      weight_decay: 0.0                 # L2 regularization factor
+      grad_clip_norm: 1.0               # Clip gradient norm to stabilize training
+      scheduler_factor: 0.5             # LR reduction multiplier on plateau
+      scheduler_patience: 2             # Plateau epochs before reducing LR
+      scheduler_min_lr: 1.0e-5          # Lower bound for learning rate
 
     loss:
-      sentiment_label_smoothing: 0.1
-      topic_label_smoothing: 0.2
-      sentiment_loss_weight: 1.0
-      topic_loss_weight: 1.0
+      sentiment_label_smoothing: 0.1     # Label smoothing for sentiment CE loss
+      topic_label_smoothing: 0.2         # Label smoothing for topic CE loss
+      sentiment_loss_weight: 1.0         # Weight of sentiment loss in total loss
+      topic_loss_weight: 1.0             # Weight of topic loss in total loss
 
     early_stopping:
-      patience: 10
-      verbose: true
-      delta: 0.0
-      checkpoint_path: "./outputs/transformer_multitask_best_model.pt"
+      patience: 10                       # Stop after N non-improving epochs
+      verbose: true                      # Print save/improvement messages
+      delta: 0.0                         # Minimum val_loss improvement to reset patience
+      checkpoint_path: "./outputs/transformer_multitask_best_model.pt" # Best model save path
 
     output:
-      sentiment_report_path: "./logs/transformer_sentiment_classification_report.txt"
-      topic_report_path: "./logs/transformer_topic_classification_report.txt"
-      confusion_matrix_dir: "./images/transformer"
+      sentiment_report_path: "./logs/transformer_sentiment_classification_report.txt" # Sentiment report output
+      topic_report_path: "./logs/transformer_topic_classification_report.txt" # Topic report output
+      confusion_matrix_dir: "./images/transformer" # Confusion matrix folder
 
     wandb:
-      enabled: true
-      project: "student-feedback"
-      run_name: null
-      tags: ["transformer", "multitask"]
+      enabled: true                      # Enable Weights & Biases logging
+      project: "student-feedback"       # W&B project name
+      run_name: null                     # Optional custom run name
+      tags: ["transformer", "multitask"] # Tags attached to run
 
   RNN:
     model:
-      min_freq: 2
-      rnn_type: "gru"
-      embedding_dim: 128
-      hidden_dim: 96
-      n_layers: 2
-      dropout: 0.35
-      bidirectional: true
+      min_freq: 2                        # Min token frequency kept in vocabulary
+      rnn_type: "gru"                   # Recurrent backbone: gru or rnn
+      embedding_dim: 128                 # Word embedding vector size
+      hidden_dim: 96                     # RNN hidden state size
+      n_layers: 2                        # Number of stacked recurrent layers
+      dropout: 0.35                      # Dropout applied in encoder/head
+      bidirectional: true                # Use bidirectional recurrent encoder
 
     training:
-      epochs: 30
-      batch_size: 32
-      learning_rate: 5.0e-4
-      weight_decay: 1.0e-4
-      grad_clip_norm: 1.0
-      scheduler_factor: 0.5
-      scheduler_patience: 2
-      scheduler_min_lr: 1.0e-5
+      epochs: 30                         # Maximum training epochs
+      batch_size: 32                     # Samples per optimization step
+      learning_rate: 5.0e-4             # Optimizer learning rate
+      weight_decay: 1.0e-4              # L2 regularization factor
+      grad_clip_norm: 1.0               # Clip gradient norm to stabilize training
+      scheduler_factor: 0.5             # LR reduction multiplier on plateau
+      scheduler_patience: 2             # Plateau epochs before reducing LR
+      scheduler_min_lr: 1.0e-5          # Lower bound for learning rate
 
     loss:
-      sentiment_label_smoothing: 0.1
-      topic_label_smoothing: 0.2
-      sentiment_loss_weight: 1.0
-      topic_loss_weight: 1.5
+      sentiment_label_smoothing: 0.1     # Label smoothing for sentiment CE loss
+      topic_label_smoothing: 0.2         # Label smoothing for topic CE loss
+      sentiment_loss_weight: 1.0         # Weight of sentiment loss in total loss
+      topic_loss_weight: 1.5             # Weight of topic loss in total loss
 
     early_stopping:
-      patience: 5
-      verbose: true
-      delta: 0.0
-      checkpoint_path: "./outputs/rnn_multitask_best_model.pt"
+      patience: 5                        # Stop after N non-improving epochs
+      verbose: true                      # Print save/improvement messages
+      delta: 0.0                         # Minimum val_loss improvement to reset patience
+      checkpoint_path: "./outputs/rnn_multitask_best_model.pt" # Best model save path
 
     output:
-      sentiment_report_path: "./logs/rnn_sentiment_classification_report.txt"
-      topic_report_path: "./logs/rnn_topic_classification_report.txt"
-      confusion_matrix_dir: "./images/rnn"
+      sentiment_report_path: "./logs/rnn_sentiment_classification_report.txt" # Sentiment report output
+      topic_report_path: "./logs/rnn_topic_classification_report.txt" # Topic report output
+      confusion_matrix_dir: "./images/rnn" # Confusion matrix folder
 
     wandb:
-      enabled: true
-      project: "student-feedback"
-      run_name: null
-      tags: ["rnn", "multitask"]
+      enabled: true                      # Enable Weights & Biases logging
+      project: "student-feedback"       # W&B project name
+      run_name: null                     # Optional custom run name
+      tags: ["rnn", "multitask"]      # Tags attached to run
 
 # ==============================================================================
 # LOGGING CONFIGURATION
 # ==============================================================================
 logging:
-  level: "INFO"                           # Logging level: DEBUG, INFO, WARNING, ERROR
+  level: "INFO"                           # Console/file log verbosity: DEBUG, INFO, WARNING, ERROR
 
 # ==============================================================================
 # REPRODUCIBILITY CONFIGURATION
 # ==============================================================================
 reproducibility:
-  seed: 42                                # Random seed for reproducibility
-  deterministic: true                     # Use deterministic algorithms when available
+  seed: 42                                # Global random seed (python/numpy/torch)
+  deterministic: true                     # Enable deterministic torch ops when possible
