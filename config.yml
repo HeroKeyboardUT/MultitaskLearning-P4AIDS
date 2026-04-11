@@ -93,7 +93,7 @@ pipelines:
       confusion_matrix_dir: "./images/lstm"
 
     wandb:
-      enabled: false
+      enabled: true
       project: "student-feedback"
       run_name: null
       tags: ["lstm", "multitask"]
@@ -136,7 +136,7 @@ pipelines:
       confusion_matrix_dir: "./images/transformer"
 
     wandb:
-      enabled: false
+      enabled: true
       project: "student-feedback"
       run_name: null
       tags: ["transformer", "multitask"]
@@ -179,7 +179,7 @@ pipelines:
       confusion_matrix_dir: "./images/rnn"
 
     wandb:
-      enabled: false
+      enabled: true
       project: "student-feedback"
       run_name: null
       tags: ["rnn", "multitask"]
