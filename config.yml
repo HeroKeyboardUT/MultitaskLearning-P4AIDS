@@ -100,11 +100,37 @@ pipelines:
     output: {}
 
   RNN:
-    model: {}
-    training: {}
-    loss: {}
-    early_stopping: {}
-    output: {}
+    model:
+      min_freq: 2
+      rnn_type: "gru"
+      embedding_dim: 128
+      hidden_dim: 96
+      n_layers: 2
+      dropout: 0.35
+      bidirectional: true
+
+    training:
+      epochs: 30
+      batch_size: 32
+      learning_rate: 5.0e-4
+      weight_decay: 1.0e-4
+      grad_clip_norm: 1.0
+      scheduler_factor: 0.5
+      scheduler_patience: 2
+      scheduler_min_lr: 1.0e-5
+
+    loss:
+      sentiment_loss_weight: 1.0
+      topic_loss_weight: 1.5
+
+    early_stopping:
+      patience: 5
+      checkpoint_path: "./outputs/best_multitask_rnn.pt"
+
+    output:
+      sentiment_report_path: "./logs/rnn_sentiment_report.txt"
+      topic_report_path: "./logs/rnn_topic_report.txt"
+      confusion_matrix_dir: "./images"
 
 # ==============================================================================
 # EVALUATION CONFIGURATION

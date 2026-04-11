@@ -20,6 +20,7 @@ from data_utils import download_data
 from data_utils import load_splits
 from data_utils import visualize_data
 from pipeline.lstm_pip import lstm_pipline
+from pipeline.rnn_pip import rnn_pipline
 
 
 def setup_logging(log_dir: str, log_level: str = "INFO") -> logging.Logger:
@@ -131,12 +132,6 @@ def task_run_pipeline(
     if selected_model not in {"LSTM", "TRANSFORMER", "RNN"}:
         raise ValueError(f"Unsupported model: {selected_model}")
 
-    if selected_model != "LSTM":
-        raise NotImplementedError(
-            f"Model '{selected_model}' is not implemented yet. "
-            "Currently only LSTM is available."
-        )
-
     data_config = config["data"]
     preprocess = data_config["preprocess"]
     paths_config = config["paths"]
@@ -161,44 +156,93 @@ def task_run_pipeline(
         encoding=preprocess.get("encoding", "utf-8"),
     )
 
-    logger.info("Starting LSTM train -> eval -> save")
-    lstm_pipline(
-        ds_dict=ds_dict,
-        n_epochs=training_config.get("epochs", 3),
-        batch_size=training_config.get("batch_size", 16),
-        min_freq=model_config.get("min_freq", 2),
-        sent_alpha=loss_config.get("sentiment_label_smoothing", 0.0),
-        topic_alpha=loss_config.get("topic_label_smoothing", 0.0),
-        embedding_dim=model_config.get("embedding_dim", 300),
-        hidden_dim=model_config.get("hidden_dim", 256),
-        n_layers=model_config.get("n_layers", 2),
-        dropout=model_config.get("dropout", 0.5),
-        bidirectional=model_config.get("bidirectional", True),
-        lr=training_config.get("learning_rate", 1e-3),
-        weight_decay=training_config.get("weight_decay", 0.0),
-        early_stopping_patience=early_stopping_config.get("patience", 10),
-        early_stopping_verbose=early_stopping_config.get("verbose", True),
-        early_stopping_delta=early_stopping_config.get("delta", 0.0),
-        checkpoint_path=early_stopping_config.get(
-            "checkpoint_path",
-            "./outputs/best_multitask_lstm.pt",
-        ),
-        sentiment_names=data_config["labels"]["sentiment"]["names"],
-        topic_names=data_config["labels"]["topic"]["names"],
-        sentiment_report_path=output_config.get(
-            "sentiment_report_path",
-            "./logs/sentiment_report.txt",
-        ),
-        topic_report_path=output_config.get(
-            "topic_report_path",
-            "./logs/topic_report.txt",
-        ),
-        confusion_matrix_dir=output_config.get(
-            "confusion_matrix_dir",
-            paths_config.get("images_dir", "./images"),
-        ),
-    )
-    logger.info("LSTM pipeline completed")
+    if selected_model == "LSTM":
+        logger.info("Starting LSTM train -> eval -> save")
+        lstm_pipline(
+            ds_dict=ds_dict,
+            n_epochs=training_config.get("epochs", 3),
+            batch_size=training_config.get("batch_size", 16),
+            min_freq=model_config.get("min_freq", 2),
+            sent_alpha=loss_config.get("sentiment_label_smoothing", 0.0),
+            topic_alpha=loss_config.get("topic_label_smoothing", 0.0),
+            embedding_dim=model_config.get("embedding_dim", 300),
+            hidden_dim=model_config.get("hidden_dim", 256),
+            n_layers=model_config.get("n_layers", 2),
+            dropout=model_config.get("dropout", 0.5),
+            bidirectional=model_config.get("bidirectional", True),
+            lr=training_config.get("learning_rate", 1e-3),
+            weight_decay=training_config.get("weight_decay", 0.0),
+            early_stopping_patience=early_stopping_config.get("patience", 10),
+            early_stopping_verbose=early_stopping_config.get("verbose", True),
+            early_stopping_delta=early_stopping_config.get("delta", 0.0),
+            checkpoint_path=early_stopping_config.get(
+                "checkpoint_path",
+                "./outputs/best_multitask_lstm.pt",
+            ),
+            sentiment_names=data_config["labels"]["sentiment"]["names"],
+            topic_names=data_config["labels"]["topic"]["names"],
+            sentiment_report_path=output_config.get(
+                "sentiment_report_path",
+                "./logs/sentiment_report.txt",
+            ),
+            topic_report_path=output_config.get(
+                "topic_report_path",
+                "./logs/topic_report.txt",
+            ),
+            confusion_matrix_dir=output_config.get(
+                "confusion_matrix_dir",
+                paths_config.get("images_dir", "./images"),
+            ),
+        )
+        logger.info("LSTM pipeline completed")
+
+    elif selected_model == "RNN":
+        logger.info("Starting RNN train -> eval -> save")
+        rnn_pipline(
+            ds_dict=ds_dict,
+            n_epochs=training_config.get("epochs", 30),
+            batch_size=training_config.get("batch_size", 32),
+            min_freq=model_config.get("min_freq", 2),
+            embedding_dim=model_config.get("embedding_dim", 128),
+            hidden_dim=model_config.get("hidden_dim", 96),
+            n_layers=model_config.get("n_layers", 2),
+            dropout=model_config.get("dropout", 0.35),
+            bidirectional=model_config.get("bidirectional", True),
+            rnn_type=model_config.get("rnn_type", "gru"),
+            lr=training_config.get("learning_rate", 5e-4),
+            weight_decay=training_config.get("weight_decay", 1e-4),
+            sent_loss_weight=loss_config.get("sentiment_loss_weight", 1.0),
+            topic_loss_weight=loss_config.get("topic_loss_weight", 1.5),
+            grad_clip_norm=training_config.get("grad_clip_norm", 1.0),
+            scheduler_factor=training_config.get("scheduler_factor", 0.5),
+            scheduler_patience=training_config.get("scheduler_patience", 2),
+            scheduler_min_lr=training_config.get("scheduler_min_lr", 1e-5),
+            early_stopping_patience=early_stopping_config.get("patience", 5),
+            checkpoint_path=early_stopping_config.get(
+                "checkpoint_path",
+                "./outputs/best_multitask_rnn.pt",
+            ),
+            sentiment_names=data_config["labels"]["sentiment"]["names"],
+            topic_names=data_config["labels"]["topic"]["names"],
+            sentiment_report_path=output_config.get(
+                "sentiment_report_path",
+                "./logs/rnn_sentiment_report.txt",
+            ),
+            topic_report_path=output_config.get(
+                "topic_report_path",
+                "./logs/rnn_topic_report.txt",
+            ),
+            confusion_matrix_dir=output_config.get(
+                "confusion_matrix_dir",
+                paths_config.get("images_dir", "./images"),
+            ),
+        )
+        logger.info("RNN pipeline completed")
+
+    else:
+        raise NotImplementedError(
+            f"Model '{selected_model}' is not implemented yet."
+        )
 
     return {"model": selected_model}
 
