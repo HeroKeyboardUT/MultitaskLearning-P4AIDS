@@ -1,144 +1,161 @@
-# Student Feedback - Hướng dẫn cài đặt và sử dụng
+# Student Feedback
 
-## 1. Tổng quan
-Dự án này huấn luyện và đánh giá mô hình đa nhiệm cho 2 bài toán:
-- Phân loại cảm xúc: negative, positive
-- Phân loại chủ đề: lecturer, training_program, facility
+Huấn luyện mô hình đa nhiệm cho 2 bài toán:
+- Sentiment classification: negative, positive
+- Topic classification: lecturer, training_program, facility
 
-Hệ thống hỗ trợ 3 pipeline:
+Dự án hỗ trợ 3 pipeline:
 - LSTM
 - RNN
 - Transformer
 
-Các thành phần chính:
-- run.py: Điểm vào chính để chạy task
-- config.yml: Cấu hình dự án
-- dataloader/: Xử lý vocab và DataLoader
-- model/: Định nghĩa kiến trúc mô hình
-- pipeline/: Logic train, eval, save cho từng mô hình
-- utils/: Hàm tiện ích (xử lý dữ liệu, early stopping, vẽ biểu đồ)
+## 1. Chạy nhanh theo luồng mặc định (luôn dùng wandb)
+
+Luồng chuẩn:
+1. Cài môi trường
+2. Đăng nhập wandb
+3. Tải dữ liệu
+4. Vẽ biểu đồ dữ liệu (tùy chọn)
+5. Train pipeline theo model
+6. Kiểm tra kết quả ở logs, images, outputs và dashboard wandb
+
+Lệnh chạy nhanh:
+
+  conda activate student-feedback
+  wandb login
+  python run.py --task download
+  python run.py --task data-vis
+  python run.py --task pipeline --model LSTM
+
+Bạn có thể thay LSTM bằng RNN hoặc Transformer.
 
 ## 2. Yêu cầu hệ thống
+
 - Python 3.11
 - Conda hoặc Miniconda
 - Git
 
 ## 3. Cài đặt môi trường
-Bạn có 2 cách:
 
-### Cách A - Dùng environment.yml (khuyến nghị)
-Bước 1: Tạo môi trường
+### Cách A (khuyến nghị): dùng environment.yml
+
+Tạo môi trường:
+
   conda env create -f environment.yml
 
-Bước 2: Kích hoạt môi trường
+Kích hoạt:
+
   conda activate student-feedback
 
-### Cách B - Dùng requirements.txt
-Bước 1: Tạo môi trường rỗng
+### Cách B: dùng requirements.txt
+
+Tạo môi trường rỗng:
+
   conda create -n student-feedback python=3.11 -y
 
-Bước 2: Kích hoạt
+Kích hoạt:
+
   conda activate student-feedback
 
-Bước 3: Cài thư viện
+Cài thư viện:
+
   pip install -r requirements.txt
 
-## 4. Lưu ý về CUDA trong environment.yml
-File environment.yml hiện có cả:
-- pytorch-cuda=12.1
-- cpuonly
+## 4. Cấu hình wandb (mặc định bật)
 
-Hai tùy chọn này không nên dùng đồng thời. Nếu gặp lỗi giải dependency:
-- Nếu dùng GPU NVIDIA: giữ pytorch-cuda, bỏ cpuonly
-- Nếu dùng CPU: giữ cpuonly, bỏ pytorch-cuda
+Trong config.yml, cả 3 model đều đang để:
+- pipelines.LSTM.wandb.enabled: true
+- pipelines.RNN.wandb.enabled: true
+- pipelines.TRANSFORMER.wandb.enabled: true
 
-Sau đó tạo lại môi trường.
+Bạn nên làm 3 việc trước khi train:
 
-## 5. Cấu trúc thư mục dữ liệu
-Sau khi tải dữ liệu, thư mục data cần có:
+1. Đăng nhập:
+
+  wandb login
+
+2. Mở config.yml để đặt project cho dễ quản lý (nếu cần):
+- project: student-feedback
+- run_name: null hoặc tên run riêng
+- tags: nhãn cho run
+
+3. Chạy pipeline bình thường, hệ thống tự log metric theo epoch và tự finish run cuối quá trình.
+
+## 5. Cấu trúc dữ liệu bắt buộc
+
+Thư mục data cần có đúng 9 file sau:
 - train_sents.txt, train_sens.txt, train_tops.txt
 - validation_sents.txt, validation_sens.txt, validation_tops.txt
 - test_sents.txt, test_sens.txt, test_tops.txt
 
-## 6. Các task hỗ trợ
-run.py hỗ trợ 3 task:
-- download: Tải dữ liệu từ Google Drive theo file_id trong config
-- data-vis: Vẽ và lưu biểu đồ phân bố nhãn
-- pipeline: Train, eval, lưu kết quả theo model được chọn
+Nếu chưa có dữ liệu, chạy:
 
-## 7. Cách chạy nhanh
-### 7.1 Tải dữ liệu
   python run.py --task download
 
-Tải lại dữ liệu (ghi đè file cũ)
+Nếu muốn tải đè dữ liệu cũ:
+
   python run.py --task download --overwrite-data
 
-### 7.2 Vẽ biểu đồ phân bố
+## 6. Cách chạy từng task
+
+Run script chính:
+
+  python run.py --task <task_name> [--model <model_name>] [--overwrite-data]
+
+Task hợp lệ:
+- download
+- data-vis
+- pipeline
+
+Model hợp lệ cho pipeline:
+- LSTM
+- RNN
+- Transformer
+
+Lưu ý logic tham số từ run.py:
+- Nếu task là pipeline thì bắt buộc có --model
+- Nếu task không phải pipeline thì không được truyền --model
+
+Ví dụ chạy:
+
+Tải dữ liệu:
+
+  python run.py --task download
+
+Vẽ biểu đồ phân bố nhãn:
+
   python run.py --task data-vis
 
-### 7.3 Chạy pipeline theo model
-LSTM:
+Train LSTM:
+
   python run.py --task pipeline --model LSTM
 
-RNN:
+Train RNN:
+
   python run.py --task pipeline --model RNN
 
-Transformer:
+Train Transformer:
+
   python run.py --task pipeline --model Transformer
 
-## 8. Kết quả đầu ra
-Mỗi model sẽ lưu:
-- Checkpoint tốt nhất trong outputs/
-- Báo cáo classification trong logs/
-- Confusion matrix trong images/
+## 7. Kết quả sau khi chạy
 
-Đường dẫn cụ thể được cấu hình trong block pipelines của config.yml.
+Mỗi lần chạy pipeline sẽ tạo/ghi đè các artifact theo config:
 
-## 9. Bật W&B để theo dõi thực nghiệm
-Dự án đã tích hợp W&B cho cả 3 pipeline.
+- Best checkpoint: thư mục outputs
+- Classification report sentiment/topic: thư mục logs
+- Confusion matrix: thư mục images theo từng model
+- Runtime log tổng: logs/execution.log
+- Dashboard thực nghiệm: wandb project tương ứng
 
-Bước 1: Đăng nhập W&B
-  wandb login
+Đường dẫn chi tiết nằm trong block pipelines.<MODEL>.output và pipelines.<MODEL>.early_stopping.checkpoint_path của config.yml.
 
-Bước 2: Mở config.yml, tìm block pipelines.<MODEL>.wandb và bật:
-- enabled: true
-- project: tên project W&B
-- run_name: có thể để null hoặc đặt tên run
-- tags: danh sách nhãn
+## 8. Tùy chỉnh hyperparameter
 
-Bước 3: Chạy pipeline bình thường.
-
-Mỗi epoch sẽ được log các chỉ số train/val. Kết thúc run sẽ được finish tự động.
-
-## 10. Tùy chỉnh thông số
-Tất cả hyperparameter nằm trong config.yml theo từng model:
-- model: Kiến trúc
-- training: epoch, batch_size, learning rate, scheduler
-- loss: label smoothing, loss weight
-- early_stopping: patience, delta, đường dẫn checkpoint
-- output: đường dẫn report và ảnh
-- wandb: tracking thực nghiệm
-
-## 11. Khắc phục lỗi thường gặp
-1. Lỗi import torch, sklearn, datasets, wandb trong IDE
-- Kiểm tra đã chọn đúng Python interpreter của môi trường conda.
-- Chạy lại lệnh cài đặt thư viện.
-
-2. Lỗi tạo env do xung đột CUDA và CPU
-- Chọn một trong hai hướng GPU hoặc CPU như mục 4.
-
-3. Lỗi không tìm thấy dữ liệu
-- Chạy lại task download.
-- Kiểm tra tên file trong data/ có đúng pattern trong config.yml.
-
-4. Không thấy log W&B
-- Kiểm tra wandb.enabled đã là true.
-- Kiểm tra đã đăng nhập wandb login.
-
-## 12. Luồng chạy đề xuất
-1. Tạo môi trường và cài đặt thư viện
-2. Tải dữ liệu
-3. Vẽ biểu đồ phân bố nhãn
-4. Chạy pipeline model cần thử
-5. Xem report và confusion matrix
-6. Điều chỉnh config và lặp lại
+Tất cả tham số nằm trong config.yml theo từng model:
+- model: kiến trúc mạng
+- training: epochs, batch_size, learning_rate, scheduler, grad clip
+- loss: label smoothing và loss weight
+- early_stopping: patience, delta, checkpoint_path
+- output: report path và confusion matrix dir
+- wandb: project, run_name, tags, enabled
