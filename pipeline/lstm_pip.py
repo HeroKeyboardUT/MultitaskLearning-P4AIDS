@@ -5,7 +5,7 @@ from dataloader.data_loader import build_vocab_and_loaders
 from utils.earlystop import EarlyStopping
 from model.BidirLSTM import BidirLSTM
 from utils.model_ultis import epoch_train, epoch_evaluate, get_criterion
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, f1_score
 from utils.plot_utils import plot_confusion_matrix
 
 
@@ -71,6 +71,7 @@ def lstm_pipline(
         delta=early_stopping_delta,
         save_path=checkpoint_path,
     )
+    best_score = -1.0
 
     # Fit model
     print(f"STARTING TRAINING ON {device}...")
@@ -112,11 +113,19 @@ def lstm_pipline(
     for epoch in range(n_epochs):
         train_loss, train_acc_sent, train_acc_topic = epoch_train(model, loaders["train"], optimizer, criterion, device)
         valid_loss, valid_acc_sent, valid_acc_topic = epoch_evaluate(model, loaders["validation"], criterion, device)
+        (y_sent_true, y_sent_pred), (y_topic_true, y_topic_pred) = predict(model, loaders["validation"], device)
+        val_f1_sent = f1_score(y_sent_true, y_sent_pred, average="macro", zero_division=0)
+        val_f1_topic = f1_score(y_topic_true, y_topic_pred, average="macro", zero_division=0)
+        val_score = (val_f1_sent + val_f1_topic) / 2.0
+
+        if val_score > best_score:
+            best_score = val_score
 
 
         print(f'Epoch: {epoch+1:02}')
         print(f'\tTrain Loss: {train_loss:.3f} | Sent Acc: {train_acc_sent*100:.2f}% | Topic Acc: {train_acc_topic*100:.2f}%')
         print(f'\t Val. Loss: {valid_loss:.3f} | Sent Acc: {valid_acc_sent*100:.2f}% | Topic Acc: {valid_acc_topic*100:.2f}%')
+        print(f'\tF1 Macro Sent/Top: {val_f1_sent:.4f} / {val_f1_topic:.4f} | F1 Combined: {val_score:.4f}')
 
         if use_wandb and wandb_run is not None:
             wandb_run.log({
@@ -127,18 +136,21 @@ def lstm_pipline(
                 "val/loss": valid_loss,
                 "val/acc_sentiment": valid_acc_sent,
                 "val/acc_topic": valid_acc_topic,
+                "val/f1_sentiment_macro": val_f1_sent,
+                "val/f1_topic_macro": val_f1_topic,
+                "val/f1_combined": val_score,
             })
 
         # GỌI EARLY STOPPING
         early_stopping(valid_loss, model)
         
         if early_stopping.early_stop:
-            print(">>> Early stopping triggered.")
+            print(f">>> Early stopping triggered. (best F1 Combined observed: {best_score:.4f})")
             break
     
     # Evaluate model
     # Lấy model tốt nhất đã lưu
-    print('>>> Loading best model for evaluation...')
+    print(f'>>> Loading best model (F1 Combined={best_score:.4f}) for evaluation...')
     model.load_state_dict(torch.load(checkpoint_path, map_location=device))
 
     print('>>> Evaluating best model on test set...')
@@ -173,7 +185,10 @@ def lstm_pipline(
     print('>>> Evaluation complete. Reports and confusion matrices saved.')
 
     if use_wandb and wandb_run is not None:
-        wandb_run.log({"best/val_loss": early_stopping.val_loss_min})
+        wandb_run.log({
+            "best/val_loss": early_stopping.val_loss_min,
+            "best/f1_combined": best_score,
+        })
         wandb_run.finish()
 
     return model
