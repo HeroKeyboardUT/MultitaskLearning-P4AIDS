@@ -44,8 +44,8 @@ class BidirLSTM(nn.Module):
 		direction_factor = 2 if bidirectional else 1
 		head_input_dim = hidden_dim * direction_factor
 
-		self.fc_sentiment = nn.Linear(head_input_dim, num_sentiment_labels)
-		self.fc_topic = nn.Linear(head_input_dim, num_topic_labels)
+		self.fc_sentiment = nn.Linear(head_input_dim, num_sentiment_labels+1)
+		self.fc_topic = nn.Linear(head_input_dim, num_topic_labels+1)
 		self.dropout = nn.Dropout(dropout)
 		self.bidirectional = bidirectional
 
