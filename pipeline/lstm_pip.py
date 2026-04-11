@@ -54,9 +54,9 @@ def lstm_pipline(
     ).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
 
-    # Khởi tạo loss chuẩn (không dùng class weights)
-    criterion_sent = nn.CrossEntropyLoss()
-    criterion_topic = nn.CrossEntropyLoss()
+    # Khởi tạo loss với label smoothing
+    criterion_sent = nn.CrossEntropyLoss(label_smoothing=sent_alpha)
+    criterion_topic = nn.CrossEntropyLoss(label_smoothing=topic_alpha)
     criterion = get_criterion(criterion_sent, criterion_topic)
 
     # Khởi tạo Early Stopping

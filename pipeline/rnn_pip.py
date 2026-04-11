@@ -22,6 +22,8 @@ def rnn_pipline(
     rnn_type="gru",
     lr=5e-4,
     weight_decay=1e-4,
+    sent_alpha=0.0,
+    topic_alpha=0.0,
     sent_loss_weight=1.0,
     topic_loss_weight=1.5,
     grad_clip_norm=1.0,
@@ -67,8 +69,8 @@ def rnn_pipline(
         rnn_type=rnn_type,
     ).to(device)
 
-    criterion_sent = nn.CrossEntropyLoss()
-    criterion_topic = nn.CrossEntropyLoss()
+    criterion_sent = nn.CrossEntropyLoss(label_smoothing=sent_alpha)
+    criterion_topic = nn.CrossEntropyLoss(label_smoothing=topic_alpha)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(

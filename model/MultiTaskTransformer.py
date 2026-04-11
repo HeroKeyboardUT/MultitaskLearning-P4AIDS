@@ -43,7 +43,7 @@ class MultiTaskTransformer(nn.Module):
         )
 
         self.fc_sentiment = nn.Linear(embedding_dim, num_sentiment_labels)
-        self.fc_topic = nn.Linear(embedding_dim, num_topic_labels+1)
+        self.fc_topic = nn.Linear(embedding_dim, num_topic_labels)
 
     def forward(self, text: torch.Tensor, attention_mask: torch.Tensor):
         # text shape: [batch_size, seq_len]

@@ -113,6 +113,8 @@ pipelines:
       scheduler_min_lr: 1.0e-5
 
     loss:
+      sentiment_label_smoothing: 0.1
+      topic_label_smoothing: 0.2
       sentiment_loss_weight: 1.0
       topic_loss_weight: 1.0
 
@@ -148,6 +150,8 @@ pipelines:
       scheduler_min_lr: 1.0e-5
 
     loss:
+      sentiment_label_smoothing: 0.1
+      topic_label_smoothing: 0.2
       sentiment_loss_weight: 1.0
       topic_loss_weight: 1.5
 
