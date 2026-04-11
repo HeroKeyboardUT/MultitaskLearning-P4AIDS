@@ -113,6 +113,7 @@ def lstm_pipline(
     for epoch in range(n_epochs):
         train_loss, train_acc_sent, train_acc_topic = epoch_train(model, loaders["train"], optimizer, criterion, device)
         valid_loss, valid_acc_sent, valid_acc_topic = epoch_evaluate(model, loaders["validation"], criterion, device)
+        current_lr = optimizer.param_groups[0]["lr"]
         (y_sent_true, y_sent_pred), (y_topic_true, y_topic_pred) = predict(model, loaders["validation"], device)
         val_f1_sent = f1_score(y_sent_true, y_sent_pred, average="macro", zero_division=0)
         val_f1_topic = f1_score(y_topic_true, y_topic_pred, average="macro", zero_division=0)
@@ -130,6 +131,7 @@ def lstm_pipline(
         if use_wandb and wandb_run is not None:
             wandb_run.log({
                 "epoch": epoch + 1,
+                "train/lr": current_lr,
                 "train/loss": train_loss,
                 "train/acc_sentiment": train_acc_sent,
                 "train/acc_topic": train_acc_topic,
