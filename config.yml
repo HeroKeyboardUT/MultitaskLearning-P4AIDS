@@ -47,10 +47,8 @@ data:
   labels:
     sentiment:
       names: ["negative", "positive"]
-      num_classes: 2
     topic:
       names: ["lecturer", "training_program", "facility"]
-      num_classes: 3
 
   # Splits to process
   splits:
@@ -185,42 +183,14 @@ pipelines:
       tags: ["rnn", "multitask"]
 
 # ==============================================================================
-# EVALUATION CONFIGURATION
-# ==============================================================================
-evaluation:
-  # Evaluation strategy
-  eval_strategy: "epoch"                  # When to evaluate: steps, epoch, no
-  eval_steps: null                        # If steps strategy, evaluate every N steps
-  
-  # Metrics to track
-  metrics:
-    - "accuracy"
-    - "f1"
-    - "precision"
-    - "recall"
-  
-  # Multi-task evaluation
-  multi_task: true                        # Evaluate both sentiment and topic
-
-# ==============================================================================
-# EXPLANATION CONFIGURATION (For model interpretability)
-# ==============================================================================
-explanation:
-  method: "attention"                     # Method: attention, gradients, lime, shap
-  num_features: 10                        # Number of important features to extract
-  visualize: true                         # Generate visualization
-
-# ==============================================================================
 # LOGGING CONFIGURATION
 # ==============================================================================
 logging:
   level: "INFO"                           # Logging level: DEBUG, INFO, WARNING, ERROR
-  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-  save_logs: true                         # Save logs to file
 
 # ==============================================================================
 # REPRODUCIBILITY CONFIGURATION
 # ==============================================================================
 reproducibility:
   seed: 42                                # Random seed for reproducibility
-  deterministic: true                     # Use deterministic algorithms
+  deterministic: true                     # Use deterministic algorithms when available

@@ -3,7 +3,7 @@ Utilities to build vocabulary and PyTorch DataLoaders for Student Feedback.
 """
 
 from collections import Counter
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Tuple
 
 import torch
 from datasets import DatasetDict

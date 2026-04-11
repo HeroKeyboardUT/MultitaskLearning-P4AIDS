@@ -210,41 +210,6 @@ def download_data(
         )
 
 
-def build_dataset(
-    splits_data: Dict[str, pd.DataFrame],
-    sentiment_names: List[str],
-    topic_names: List[str]
-) -> DatasetDict:
-    """
-    Create a HuggingFace DatasetDict from processed dataframes.
-
-    Args:
-        splits_data: Dictionary of split names to processed dataframes
-        sentiment_names: List of sentiment label names
-        topic_names: List of topic label names
-
-    Returns:
-        HuggingFace DatasetDict with all splits
-    """
-    # Define dataset features
-    features = Features({
-        "sentence": Value("string"),
-        "sentiment": ClassLabel(names=sentiment_names),
-        "topic": ClassLabel(names=topic_names),
-    })
-
-    # Create datasets for each split
-    dataset_dict = {}
-    for split_name, df in splits_data.items():
-        dataset_dict[split_name] = Dataset.from_pandas(
-            df,
-            features=features,
-            preserve_index=False
-        )
-
-    return DatasetDict(dataset_dict)
-
-
 def load_dataset(
     split_name: str,
     data_dir: str,
@@ -439,39 +404,3 @@ def visualize_data(ds_dict: DatasetDict, images_dir: str = "images") -> Dict[str
     }
 
     return saved_paths
-
-
-def get_class_weights(
-    train_dataset: Dataset,
-    column_name: str,
-    num_classes: int = None,
-):
-    """
-    Compute balanced class weights from train split only.
-
-    Args:
-        train_dataset: HuggingFace Dataset of train split
-        column_name: Target label column name (e.g., sentiment, topic)
-
-    Args:
-        num_classes: Total number of classes. If provided, output weights
-            always have this length (useful when some classes are absent
-            in the current split).
-
-    Returns:
-        Torch tensor of class weights sorted by class id.
-    """
-    import torch
-
-    labels = torch.tensor(train_dataset[column_name], dtype=torch.long)
-
-    if labels.numel() == 0:
-        raise ValueError(f"No labels found in column '{column_name}'.")
-
-    if num_classes is None:
-        num_classes = int(labels.max().item()) + 1
-
-    counts = torch.bincount(labels, minlength=num_classes).float()
-    weights = counts.sum() / (num_classes * counts.clamp_min(1.0))
-
-    return weights

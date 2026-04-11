@@ -8,9 +8,12 @@ and executes selected pipeline tasks.
 import argparse
 import logging
 import os
+import random
 import sys
 from pathlib import Path
 
+import numpy as np
+import torch
 import yaml
 
 # Add utils to path for imports
@@ -22,6 +25,28 @@ from data_utils import visualize_data
 from pipeline.lstm_pip import lstm_pipline
 from pipeline.rnn_pip import rnn_pipline
 from pipeline.transformer_pip import transformer_pipeline
+
+
+def set_global_seed(seed: int, deterministic: bool = True) -> None:
+    """
+    Set random seed for reproducible experiments.
+
+    Args:
+        seed: Global seed value.
+        deterministic: If True, enable deterministic torch behavior.
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+
+    if deterministic:
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        torch.use_deterministic_algorithms(True, warn_only=True)
 
 
 def setup_logging(log_dir: str, log_level: str = "INFO") -> logging.Logger:
@@ -430,11 +455,17 @@ def main():
     # Load configuration
     config = load_config(config_path)
 
+    reproducibility_config = config.get("reproducibility", {})
+    seed = reproducibility_config.get("seed", 42)
+    deterministic = reproducibility_config.get("deterministic", True)
+    set_global_seed(seed=seed, deterministic=deterministic)
+
     # Setup logging
     logger = setup_logging(
         log_dir=config["paths"]["logs_dir"],
         log_level=config["logging"].get("level", "INFO")
     )
+    logger.info(f"Global seed initialized: {seed} | deterministic={deterministic}")
 
     # Create necessary directories
     create_directories(config["paths"])
