@@ -218,6 +218,8 @@ def task_run_pipeline(
             scheduler_patience=training_config.get("scheduler_patience", 2),
             scheduler_min_lr=training_config.get("scheduler_min_lr", 1e-5),
             early_stopping_patience=early_stopping_config.get("patience", 5),
+            early_stopping_verbose=early_stopping_config.get("verbose", True),
+            early_stopping_delta=early_stopping_config.get("delta", 0.0),
             checkpoint_path=early_stopping_config.get(
                 "checkpoint_path",
                 "./outputs/best_multitask_rnn.pt",

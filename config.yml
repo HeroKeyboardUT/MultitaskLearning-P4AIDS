@@ -125,6 +125,8 @@ pipelines:
 
     early_stopping:
       patience: 5
+      verbose: true
+      delta: 0.0
       checkpoint_path: "./outputs/best_multitask_rnn.pt"
 
     output:

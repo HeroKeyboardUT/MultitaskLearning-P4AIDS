@@ -5,6 +5,7 @@ from sklearn.metrics import classification_report, f1_score
 
 from dataloader.data_loader import build_vocab_and_loaders
 from model.BidirRNN import BidirRNN
+from utils.earlystop import EarlyStopping
 from utils.plot_utils import plot_confusion_matrix
 
 
@@ -28,6 +29,8 @@ def rnn_pipline(
     scheduler_patience=2,
     scheduler_min_lr=1e-5,
     early_stopping_patience=5,
+    early_stopping_verbose=True,
+    early_stopping_delta=0.0,
     checkpoint_path="./outputs/best_multitask_rnn.pt",
     sentiment_names=None,
     topic_names=None,
@@ -90,8 +93,13 @@ def rnn_pipline(
     Path(topic_report_path).parent.mkdir(parents=True, exist_ok=True)
     Path(confusion_matrix_dir).mkdir(parents=True, exist_ok=True)
 
+    early_stopping = EarlyStopping(
+        save_path=checkpoint_path,
+        patience=early_stopping_patience,
+        verbose=early_stopping_verbose,
+        delta=early_stopping_delta,
+    )
     best_score = -1.0
-    bad_epochs = 0
 
     print(f"STARTING RNN TRAINING ON {device}...")
     print(f"Using {rnn_type.upper()} backbone")
@@ -175,27 +183,30 @@ def rnn_pipline(
         scheduler.step(val_score)
         current_lr = optimizer.param_groups[0]["lr"]
 
+        if val_score > best_score:
+            best_score = val_score
+
+        print(f"Epoch: {epoch + 1:02}")
         print(
-            f"Epoch: {epoch + 1:02} | "
-            f"Train Loss: {avg_train_loss:.4f} | "
-            f"Val Loss: {avg_val_loss:.4f} || "
-            f"Sent Acc (Train/Val): {train_acc_sent * 100:.2f}% / {val_acc_sent * 100:.2f}% | "
-            f"Topic Acc (Train/Val): {train_acc_topic * 100:.2f}% / {val_acc_topic * 100:.2f}% || "
-            f"F1 Sent/Topic: {val_f1_sent:.4f} / {val_f1_topic:.4f} | "
+            f"\tTrain Loss: {avg_train_loss:.4f} | "
+            f"Sent Acc: {train_acc_sent * 100:.2f}% | "
+            f"Topic Acc: {train_acc_topic * 100:.2f}%"
+        )
+        print(
+            f"\t Val. Loss: {avg_val_loss:.4f} | "
+            f"Sent Acc: {val_acc_sent * 100:.2f}% | "
+            f"Topic Acc: {val_acc_topic * 100:.2f}%"
+        )
+        print(
+            f"\tF1 Macro Sent/Top: {val_f1_sent:.4f} / {val_f1_topic:.4f} | "
             f"F1 Combined: {val_score:.4f} | LR: {current_lr:.2e}"
         )
 
-        if val_score > best_score:
-            best_score = val_score
-            torch.save(model.state_dict(), checkpoint_path)
-            bad_epochs = 0
-        else:
-            bad_epochs += 1
-
-        if bad_epochs >= early_stopping_patience:
+        early_stopping(avg_val_loss, model)
+        if early_stopping.early_stop:
             print(
-                f">>> Early stopping at epoch {epoch + 1} "
-                f"(best F1 Combined: {best_score:.4f})"
+                f">>> Early stopping triggered at epoch {epoch + 1} "
+                f"(best F1 Combined observed: {best_score:.4f})"
             )
             break
 
