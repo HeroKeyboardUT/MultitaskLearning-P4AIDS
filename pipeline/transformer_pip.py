@@ -100,6 +100,33 @@ def transformer_pipeline(
 
     print(f"STARTING TRANSFORMER TRAINING ON {device}...")
 
+    wandb_config_payload = {
+        "model": "TRANSFORMER",
+        "vocab_size": len(vocab),
+        "device": str(device),
+        "n_epochs": n_epochs,
+        "batch_size": batch_size,
+        "min_freq": min_freq,
+        "embedding_dim": embedding_dim,
+        "nhead": nhead,
+        "num_encoder_layers": num_encoder_layers,
+        "dim_feedforward": dim_feedforward,
+        "dropout": dropout,
+        "max_seq_len": max_seq_len,
+        "learning_rate": lr,
+        "weight_decay": weight_decay,
+        "sentiment_label_smoothing": sent_alpha,
+        "topic_label_smoothing": topic_alpha,
+        "sentiment_loss_weight": sent_loss_weight,
+        "topic_loss_weight": topic_loss_weight,
+        "grad_clip_norm": grad_clip_norm,
+        "scheduler_factor": scheduler_factor,
+        "scheduler_patience": scheduler_patience,
+        "scheduler_min_lr": scheduler_min_lr,
+        "early_stopping_patience": early_stopping_patience,
+        "early_stopping_delta": early_stopping_delta,
+    }
+
     wandb_run = None
     if use_wandb:
         try:
@@ -108,21 +135,7 @@ def transformer_pipeline(
                 project=wandb_project,
                 name=wandb_run_name,
                 tags=wandb_tags,
-                config={
-                    "model": "TRANSFORMER",
-                    "epochs": n_epochs,
-                    "batch_size": batch_size,
-                    "learning_rate": lr,
-                    "weight_decay": weight_decay,
-                    "embedding_dim": embedding_dim,
-                    "nhead": nhead,
-                    "num_encoder_layers": num_encoder_layers,
-                    "dim_feedforward": dim_feedforward,
-                    "dropout": dropout,
-                    "max_seq_len": max_seq_len,
-                    "label_smoothing_sentiment": sent_alpha,
-                    "label_smoothing_topic": topic_alpha,
-                },
+                config=wandb_config_payload,
             )
         except ImportError:
             print("[WARN] wandb is not installed. Continuing without W&B logging.")
