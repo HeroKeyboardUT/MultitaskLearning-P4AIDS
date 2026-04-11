@@ -60,8 +60,8 @@ def lstm_pipline(
     weights_topic = get_class_weights(ds_dict["train"], "topic")
 
     # Khởi tạo loss với weight tương ứng
-    criterion_sent = nn.CrossEntropyLoss(weight=weights_sent.to(device), label_smoothing=sent_alpha)
-    criterion_topic = nn.CrossEntropyLoss(weight=weights_topic.to(device), label_smoothing=topic_alpha)
+    criterion_sent = nn.CrossEntropyLoss()
+    criterion_topic = nn.CrossEntropyLoss()
     criterion = get_criterion(criterion_sent, criterion_topic)
 
     # Khởi tạo Early Stopping
