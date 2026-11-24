@@ -161,7 +161,7 @@ pipelines:
       sentiment_label_smoothing: 0.1     # Label smoothing for sentiment CE loss
       topic_label_smoothing: 0.2         # Label smoothing for topic CE loss
       sentiment_loss_weight: 1.0         # Weight of sentiment loss in total loss
-      topic_loss_weight: 1.5             # Weight of topic loss in total loss
+      topic_loss_weight: 1.0             # Weight of topic loss in total loss
 
     early_stopping:
       patience: 5                        # Stop after N non-improving epochs

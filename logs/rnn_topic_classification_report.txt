@@ -1,9 +1,9 @@
                   precision    recall  f1-score   support
 
-        lecturer       0.95      0.95      0.95      2216
-training_program       0.77      0.81      0.79       525
-        facility       0.93      0.90      0.91       143
+        lecturer       0.95      0.94      0.95      2216
+training_program       0.76      0.80      0.78       525
+        facility       0.91      0.90      0.90       143
 
-        accuracy                           0.92      2884
-       macro avg       0.88      0.88      0.88      2884
-    weighted avg       0.92      0.92      0.92      2884
+        accuracy                           0.91      2884
+       macro avg       0.87      0.88      0.88      2884
+    weighted avg       0.92      0.91      0.91      2884

@@ -26,7 +26,7 @@ def rnn_pipline(
     sent_alpha=0.0,
     topic_alpha=0.0,
     sent_loss_weight=1.0,
-    topic_loss_weight=1.5,
+    topic_loss_weight=1.0,
     grad_clip_norm=1.0,
     scheduler_factor=0.5,
     scheduler_patience=2,
