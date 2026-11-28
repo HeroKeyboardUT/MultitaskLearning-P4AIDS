@@ -182,6 +182,7 @@
 \renewcommand{\arraystretch}{1.45}
 \setlength{\tabcolsep}{10pt}
 \begin{tabular}{ll}
+\textbf{Giảng viên hướng dẫn:} & ThS. Trần Huy \\
 \textbf{Sinh viên thực hiện:} & Phạm Quang Hiếu -- 2310974 \\
 & Nguyễn Thiên Hào -- 2310853 \\
 & Nguyễn Trung Hiếu -- 2310965
@@ -676,6 +677,13 @@ Trên tác vụ \textbf{Topic} (Hình~\ref{fig:cm_topic}):
 
 \subsection{Kết luận và Hướng phát triển}
 Nhóm đã hoàn thiện nghiên cứu và thực nghiệm học đa nhiệm cho bài toán phân loại cảm xúc và chủ đề phản hồi sinh viên với ba kiến trúc \texttt{BidirLSTM}, \texttt{BidirRNN (BiGRU)} và \texttt{MultiTaskTransformer}. Kết quả đối chiếu công bằng với trọng số loss $(1.0, 1.0)$ cho thấy \texttt{BidirRNN (BiGRU)} đạt hiệu năng cao nhất (Avg F1 \textbf{0.915}) với kích thước mô hình gọn nhẹ nhất (1.95 MB). Hướng phát triển tiếp theo gồm: (1) áp dụng mô hình ngôn ngữ tiền huấn luyện tiếng Việt như \textit{PhoBERT} hoặc \textit{ViDeBERTa} để cải thiện ngữ cảnh giữa \texttt{training\_program} và \texttt{lecturer}, và (2) thử nghiệm hàm mất mát có trọng số lớp hoặc \textit{Focal Loss} nhằm cải thiện độ phủ ở các lớp thiểu số.
+
+\subsection{Liên kết Dự án}
+Mã nguồn đầy đủ, kết quả thực nghiệm và nhật ký huấn luyện của nhóm được công khai tại:
+\begin{itemize}
+    \item \textbf{GitHub Repository:} \url{https://github.com/HeroKeyboardUT/MultitaskLearning-P4AIDS}
+    \item \textbf{Weights \& Biases Dashboard:} \href{https://wandb.ai/thienhao164/student-feedback?nw=nwuserthienhao164}{W\&B Dashboard -- Student Feedback} (\url{https://wandb.ai/thienhao164/student-feedback})
+\end{itemize}
 
 \subsection{Tuyên bố Liêm chính Học thuật}
 Nhóm cam kết tuân thủ quy định liêm chính học thuật của môn học:
