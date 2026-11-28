@@ -181,7 +181,7 @@ cython_debug/
 .cursorindexingignore
 
 # Weights & Biases local runs
-wandb/
+/wandb/
 
 # LaTeX build artifacts
 *.aux

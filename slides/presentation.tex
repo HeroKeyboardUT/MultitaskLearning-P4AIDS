@@ -47,6 +47,9 @@
 \setbeamertemplate{itemize items}[square]
 \setbeamertemplate{itemize subitem}{--}
 
+\renewcommand{\arraystretch}{1.28}
+\setlength{\tabcolsep}{7pt}
+
 \setbeamertemplate{frametitle}{%
   \vspace{0.3em}
   \insertframetitle\par
@@ -199,8 +202,7 @@
   {\color{bwLightGray}\hrule height 0.5pt}
   \vspace{0.4cm}
   {\small\color{bwGray}
-    \textbf{Tasks:} Binary Sentiment $\times$ 3-Class Topic \quad$\cdot$\quad
-    \textbf{Backbones:} BiGRU, BiLSTM, Transformer Encoder
+    \textbf{Group 15}
   }
 \end{frame}
 
@@ -235,7 +237,7 @@
       \begin{table}
         \centering
         \footnotesize
-        \begin{tabular}{@{}lrrr@{}}
+        \begin{tabular}{lrrr}
           \toprule
           \textbf{Split} & \textbf{Raw} & \textbf{Filtered} & \textbf{Kept (\%)} \\
           \midrule
@@ -264,11 +266,11 @@
 \begin{frame}{Dataset Analysis: Sentiment Distribution}
   \framesubtitle{Balanced binary classes across Train, Validation, and Test splits}
   \begin{columns}[c,totalwidth=\textwidth]
-    \begin{column}{0.64\textwidth}
+    \begin{column}{0.66\textwidth}
       \centering
-      \includegraphics[width=\linewidth,height=0.78\textheight,keepaspectratio]{../images/sentiment_distribution.png}
+      \includegraphics[width=\linewidth,height=0.80\textheight,keepaspectratio]{../images/sentiment_distribution.png}
     \end{column}
-    \begin{column}{0.34\textwidth}
+    \begin{column}{0.32\textwidth}
       \textbf{Distribution Analysis}
       \begin{itemize}
         \item \textbf{Near-balanced split:} Both \texttt{negative} and \texttt{positive} are well represented across all three splits.
@@ -289,11 +291,11 @@
 \begin{frame}{Dataset Analysis: Topic Distribution}
   \framesubtitle{Strong class imbalance dominated by \texttt{lecturer} feedback}
   \begin{columns}[c,totalwidth=\textwidth]
-    \begin{column}{0.64\textwidth}
+    \begin{column}{0.66\textwidth}
       \centering
-      \includegraphics[width=\linewidth,height=0.78\textheight,keepaspectratio]{../images/topic_distribution.png}
+      \includegraphics[width=\linewidth,height=0.80\textheight,keepaspectratio]{../images/topic_distribution.png}
     \end{column}
-    \begin{column}{0.34\textwidth}
+    \begin{column}{0.32\textwidth}
       \textbf{Imbalance Analysis}
       \begin{itemize}
         \item \textbf{Test support ($N=2,884$):}
@@ -660,7 +662,7 @@
   \begin{table}
     \centering
     \scriptsize
-    \begin{tabular}{@{}lccc@{}}
+    \begin{tabular}{lccc}
       \toprule
       \textbf{Configuration} & \textbf{BidirLSTM} & \textbf{BidirRNN (BiGRU)} & \textbf{Transformer} \\
       \midrule
@@ -686,7 +688,7 @@
   \begin{table}
     \centering
     \footnotesize
-    \begin{tabular}{@{}lcccccc@{}}
+    \begin{tabular}{lcccccc}
       \toprule
       \textbf{Model} & \textbf{Sent Acc} & \textbf{Sent F1} & \textbf{Topic Acc} & \textbf{Topic F1} & \textbf{Avg F1} & \textbf{Checkpoint} \\
       \midrule
@@ -703,8 +705,9 @@
   \begin{table}
     \centering
     \scriptsize
-    \setlength{\tabcolsep}{4pt}
-    \begin{tabular}{@{}lccccc@{}}
+    \setlength{\tabcolsep}{6pt}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{lccccc}
       \toprule
       \textbf{Model} & \texttt{negative} (1,345) & \texttt{positive} (1,539) & \texttt{lecturer} (2,216) & \texttt{training\_program} (525) & \texttt{facility} (143) \\
       \midrule
@@ -712,7 +715,8 @@
       BidirLSTM                 & \textbf{0.94} & 0.94          & \textbf{0.95} & \textbf{0.78} & 0.89 \\
       MultiTaskTransformer      & 0.93          & 0.94          & \textbf{0.95} & 0.77          & 0.87 \\
       \bottomrule
-    \end{tabular}
+    \end{tabular}%
+    }
   \end{table}
 
   \vspace{0.2cm}
@@ -722,20 +726,53 @@
 \end{frame}
 
 % ==============================================================================
+% SLIDE 11: W&B Learning Curves
+% ==============================================================================
+\begin{frame}{Training Dynamics: W\&B Learning Curves}
+  \framesubtitle{Validation metrics per epoch across BiGRU, BiLSTM, and Transformer (from W\&B)}
+  \centering
+  \includegraphics[width=\textwidth,height=0.67\textheight,keepaspectratio]{../images/wandb/wandb_learning_curves.png}\\[0.2em]
+  {\scriptsize\color{bwGray}
+    \textbf{Note:} Baseline W\&B runs (\texttt{RNN-20260412} used $w_{\text{topic}}=1.5$, so \texttt{val/loss} $\sim 1.16$; after aligning to $1.0$, RNN \texttt{best/val\_loss} drops to \textbf{0.8633}). BiGRU shows the smoothest F1 curve.
+  }
+\end{frame}
+
+% ==============================================================================
+% SLIDE 12: W&B Best Metrics Summary
+% ==============================================================================
+\begin{frame}{Training Dynamics: Best Validation Metrics (W\&B)}
+  \framesubtitle{Comparison of \texttt{best/val\_loss} and \texttt{best/f1\_combined} across tracked runs}
+  \begin{columns}[c,totalwidth=\textwidth]
+    \begin{column}{0.66\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{../images/wandb/wandb_best_metrics.png}
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \textbf{Key Observations}
+      \begin{itemize}
+        \item \textbf{BiGRU:} Highest \texttt{best/f1\_combined} with steady convergence; after loss-weight alignment ($1.0:1.0$), \texttt{best/val\_loss} drops to \textbf{0.8633}.
+        \item \textbf{BiLSTM:} Low \texttt{val/loss} ($\sim 0.88$) yet slightly lower combined F1 than BiGRU.
+        \item \textbf{Transformer:} Slower convergence and lower topic macro-F1 on 10.5k samples.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
 % SLIDE 11: Sentiment Confusion Matrices (BiGRU & BiLSTM)
 % ==============================================================================
 \begin{frame}{Error Analysis: Sentiment Confusion Matrices (1/2)}
   \framesubtitle{Test set ($N = 2,884$) — \texttt{BidirRNN} (BiGRU) vs. \texttt{BidirLSTM}}
   \begin{columns}[c,totalwidth=\textwidth]
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.495\textwidth}
       \centering
-      {\small\textbf{BidirRNN (BiGRU)} — Acc: 0.95, F1: 0.95}\\[0.3em]
-      \includegraphics[width=\linewidth,height=0.68\textheight,keepaspectratio]{../images/rnn/rnn_sentiment_confusion_matrix.png}
+      {\small\textbf{BidirRNN (BiGRU)} — Acc: 0.95, F1: 0.95}\\[0.2em]
+      \includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{../images/rnn/rnn_sentiment_confusion_matrix.png}
     \end{column}
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.495\textwidth}
       \centering
-      {\small\textbf{BidirLSTM} — Acc: 0.94, F1: 0.94}\\[0.3em]
-      \includegraphics[width=\linewidth,height=0.68\textheight,keepaspectratio]{../images/lstm/lstm_sentiment_confusion_matrix.png}
+      {\small\textbf{BidirLSTM} — Acc: 0.94, F1: 0.94}\\[0.2em]
+      \includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{../images/lstm/lstm_sentiment_confusion_matrix.png}
     \end{column}
   \end{columns}
 \end{frame}
@@ -746,12 +783,12 @@
 \begin{frame}{Error Analysis: Sentiment Confusion Matrices (2/2)}
   \framesubtitle{Test set ($N = 2,884$) — \texttt{MultiTaskTransformer} \& cross-model comparison}
   \begin{columns}[c,totalwidth=\textwidth]
-    \begin{column}{0.52\textwidth}
+    \begin{column}{0.55\textwidth}
       \centering
-      {\small\textbf{MultiTaskTransformer} — Acc: 0.93, F1: 0.93}\\[0.3em]
-      \includegraphics[width=\linewidth,height=0.68\textheight,keepaspectratio]{../images/transformer/transformer_sentiment_confusion_matrix.png}
+      {\small\textbf{MultiTaskTransformer} — Acc: 0.93, F1: 0.93}\\[0.2em]
+      \includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{../images/transformer/transformer_sentiment_confusion_matrix.png}
     \end{column}
-    \begin{column}{0.45\textwidth}
+    \begin{column}{0.42\textwidth}
       \textbf{Sentiment Error Analysis}
       \begin{itemize}
         \item \textbf{High negative recall ($0.95$--$0.97$):} BiGRU misclassifies only $41$ negative samples ($3.0\%$), vs. $49$ for BiLSTM and $71$ for Transformer.
@@ -768,15 +805,15 @@
 \begin{frame}{Error Analysis: Topic Confusion Matrices (1/2)}
   \framesubtitle{Test set ($N = 2,884$) — \texttt{BidirRNN} (BiGRU) vs. \texttt{BidirLSTM}}
   \begin{columns}[c,totalwidth=\textwidth]
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.495\textwidth}
       \centering
-      {\small\textbf{BidirRNN (BiGRU)} — Acc: 0.91, F1: 0.88}\\[0.3em]
-      \includegraphics[width=\linewidth,height=0.68\textheight,keepaspectratio]{../images/rnn/rnn_topic_confusion_matrix.png}
+      {\small\textbf{BidirRNN (BiGRU)} — Acc: 0.91, F1: 0.88}\\[0.2em]
+      \includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{../images/rnn/rnn_topic_confusion_matrix.png}
     \end{column}
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.495\textwidth}
       \centering
-      {\small\textbf{BidirLSTM} — Acc: 0.91, F1: 0.87}\\[0.3em]
-      \includegraphics[width=\linewidth,height=0.68\textheight,keepaspectratio]{../images/lstm/lstm_topic_confusion_matrix.png}
+      {\small\textbf{BidirLSTM} — Acc: 0.91, F1: 0.87}\\[0.2em]
+      \includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{../images/lstm/lstm_topic_confusion_matrix.png}
     \end{column}
   \end{columns}
 \end{frame}
@@ -787,12 +824,12 @@
 \begin{frame}{Error Analysis: Topic Confusion Matrices (2/2)}
   \framesubtitle{Test set ($N = 2,884$) — \texttt{MultiTaskTransformer} \& cross-model comparison}
   \begin{columns}[c,totalwidth=\textwidth]
-    \begin{column}{0.52\textwidth}
+    \begin{column}{0.55\textwidth}
       \centering
-      {\small\textbf{MultiTaskTransformer} — Acc: 0.91, F1: 0.86}\\[0.3em]
-      \includegraphics[width=\linewidth,height=0.68\textheight,keepaspectratio]{../images/transformer/transformer_topic_confusion_matrix.png}
+      {\small\textbf{MultiTaskTransformer} — Acc: 0.91, F1: 0.86}\\[0.2em]
+      \includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{../images/transformer/transformer_topic_confusion_matrix.png}
     \end{column}
-    \begin{column}{0.45\textwidth}
+    \begin{column}{0.42\textwidth}
       \textbf{Topic Error Analysis}
       \begin{itemize}
         \item \textbf{\texttt{lecturer} ($0.95$ F1):} Dominant class ($76.8\%$) is cleanly separated across all three backbones.
